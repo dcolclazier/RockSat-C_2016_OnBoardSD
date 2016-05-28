@@ -19,8 +19,8 @@ namespace RockSatC_2016.Work_Items
         private MemoryMonitor()
         {
             var unused = new byte[] {};
-            _workItem = new WorkItem(MonitorMemory,ref unused, persistent:true, pauseable:false );
-
+            _workItem = new WorkItem(MonitorMemory,ref unused, loggable:false, persistent:true, pauseable:false );
+            
         }
 
         private void MonitorMemory()
@@ -30,7 +30,7 @@ namespace RockSatC_2016.Work_Items
             Debug.Print("Pausing actions to allow logger to catch up... " + Debug.GC(false));
 
             foreach (WorkItem action in _pauseableWorkItems) action.Stop();
-            while (_logger.pendingItems > 0) ;
+            while (_logger.PendingItems > 0) ;
 
             Debug.Print("Resuming paused actions... Current FreeMem: " + Debug.GC(true));
 

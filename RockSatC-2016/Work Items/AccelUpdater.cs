@@ -16,7 +16,7 @@ namespace RockSatC_2016.Work_Items
         StartByte = 0xFF,
         Geiger = 0x00,
         AccelDump = 0x01,
-        BNODump = 0x02
+        BnoDump = 0x02
     }
 
     public class AccelUpdater  {
@@ -24,7 +24,7 @@ namespace RockSatC_2016.Work_Items
         private static readonly AnalogInput YPin = new AnalogInput(AnalogChannels.ANALOG_PIN_A1);
         private static readonly AnalogInput ZPin = new AnalogInput(AnalogChannels.ANALOG_PIN_A2);
 
-        private readonly AccelData _accelData = new AccelData();
+        //private readonly AccelData _accelData = new AccelData();
         private readonly WorkItem _workItem;
         private readonly byte[] _dataArray;
         private readonly int _arraySize;
@@ -35,7 +35,7 @@ namespace RockSatC_2016.Work_Items
             Debug.Print("Initializing Accelerometer data updater");
             _arraySize = arraySize;
             _dataArray = new byte[_arraySize + 10]; //3 bytes for each time stamp, 2 for size, 1 for type, 1 for start
-            _workItem = new WorkItem(DumpAccelData, ref _dataArray, EventType.AccelDump, _accelData, persistent:true, pauseable:true);
+            _workItem = new WorkItem(DumpAccelData, ref _dataArray, loggable:true, persistent:true, pauseable:true);
             //_frequency = frequency;
 
             //start data packet w/ correct info

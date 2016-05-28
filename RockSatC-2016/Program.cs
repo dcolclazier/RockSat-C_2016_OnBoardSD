@@ -34,8 +34,8 @@ namespace RockSatC_2016 {
             var rich = new RICH();
 
             //THIS SECTION CREATES/INITIALIZES THE SERIAL BNO 100HZ UPDATER
-            Debug.Print("Initializing BNO Sensor on Serial Port COM4, 1 stop bit, 0 parity, 8 data bits");
-            var bnoloop = new SerialBNOUpdater(sigFigs: 4);
+            //Debug.Print("Initializing BNO Sensor on Serial Port COM4, 1 stop bit, 0 parity, 8 data bits");
+            //var bnoloop = new SerialBnoUpdater(sigFigs: 4);
 
             //THIS SECTION CREATES/INITIALIZES THE GEIGER COUNTER UPDATER
             Debug.Print("Initializing geiger counter collection data");
@@ -61,8 +61,8 @@ namespace RockSatC_2016 {
             acceldumploop.Start();
 
             //THIS STARTS THE BNO SENSOR UPDATE
-            Debug.Print("Starting bno sensor updates...");
-            bnoloop.Start();
+            //Debug.Print("Starting bno sensor updates...");
+            //bnoloop.Start();
 
             //THIS STARTS THE Geiger UPDATE.
             Debug.Print("Starting geiger counter data collection...");
@@ -70,6 +70,7 @@ namespace RockSatC_2016 {
 
             //Starts the RICH detector
             rich.TurnOn();
+            Debug.Print("RICH detector start signal sent.");
 
             Debug.Print("Flight computer boot successful.");
         }

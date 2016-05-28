@@ -10,7 +10,9 @@ namespace RockSatC_2016.Utility
         public readonly ThreadStart Action = null;
         public readonly EventType EventType = EventType.None;
         public readonly IEventData EventData = null;
-        public byte[] ArrayData = null;
+        public bool Loggable { get; private set; }
+
+        public byte[] PacketData = null;
 
         private readonly bool _repeatable;
         public bool Persistent { get; set; }
@@ -18,12 +20,13 @@ namespace RockSatC_2016.Utility
 
         public WorkItem() { }
 
-        public WorkItem(ThreadStart action, ref byte[] arrayData, EventType type = EventType.None, IEventData eventData = null, bool persistent = false, bool pauseable = false)
+        public WorkItem(ThreadStart action, ref byte[] packetData, bool loggable, EventType type = EventType.None, bool persistent = false, bool pauseable = false)
         {
             Action = action;
             EventType = type;
-            EventData = eventData;
-            ArrayData = arrayData;
+            Loggable = loggable;
+            //EventData = eventData;
+            PacketData = packetData;
             _repeatable = persistent;
             Persistent = persistent;
             Pauseable = pauseable;

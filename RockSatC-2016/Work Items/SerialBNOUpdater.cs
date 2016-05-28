@@ -7,11 +7,11 @@ using SecretLabs.NETMF.Hardware.Netduino;
 using Math = System.Math;
 
 namespace RockSatC_2016.Work_Items {
-    public class SerialBNOUpdater {
+    public class SerialBnoUpdater {
 
         private readonly SerialBNO _bnoSensor;
 
-        private BNOData _bnoData;
+        //private BNOData _bnoData;
 
         private readonly WorkItem _workItem;
         private readonly byte[] _newData;
@@ -20,14 +20,14 @@ namespace RockSatC_2016.Work_Items {
         private int _offset = 4;
         private readonly int _precision;
 
-        public SerialBNOUpdater(int sigFigs = 4) {
+        public SerialBnoUpdater(int sigFigs = 4) {
             _bnoSensor = new SerialBNO(SerialPorts.COM4,5000,5000,SerialBNO.Bno055OpMode.Operation_Mode_Ndof);
-            _bnoData = new BNOData();
+            //_bnoData = new BNOData();
 
 
             _newData = new byte[_dataSize + _metaDataCount]; 
             _newData[0] = (byte)PacketType.StartByte; // start bit = 0xff
-            _newData[1] = (byte)PacketType.BNODump;
+            _newData[1] = (byte)PacketType.BnoDump;
             _newData[2] = (byte)((_dataSize >> 8) & 0xFF);
             _newData[3] = (byte)(_dataSize & 0xFF);
 
@@ -39,7 +39,7 @@ namespace RockSatC_2016.Work_Items {
             //}
 
 
-            _workItem = new WorkItem(GyroUpdater, ref _newData, EventType.BNOUpdate, _bnoData, true, true);
+            _workItem = new WorkItem(GyroUpdater, ref _newData, loggable:true, pauseable:true, persistent:true);
 
             _bnoSensor.begin();
         }
@@ -54,43 +54,44 @@ namespace RockSatC_2016.Work_Items {
             _newData[dataIndex++ + _offset] = time[1];
             _newData[dataIndex++ + _offset] = time[2];
 
-            var gyro_vec = _bnoSensor.read_vector(SerialBNO.Bno055VectorType.Vector_Gyroscope);
+            var gyroVec = _bnoSensor.read_vector(SerialBNO.Bno055VectorType.Vector_Gyroscope);
+            gyroVec.X = (short) (gyroVec.X*_precision);
+            gyroVec.Y = (short) (gyroVec.Y*_precision);
+            gyroVec.Z = (short) (gyroVec.Z*_precision);
 
-            _bnoData.gyro_x = (short)(gyro_vec.X * _precision);
-            _newData[dataIndex++ + _offset] = (byte) ((_bnoData.gyro_x >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte) (_bnoData.gyro_x & 0xFF);
+            _newData[dataIndex++ + _offset] = (byte) (((short)gyroVec.X >> 8) & 0xFF);
+            _newData[dataIndex++ + _offset] = (byte) ((short)gyroVec.X & 0xFF);
 
-            _bnoData.gyro_y = (short)(gyro_vec.Y * _precision);
-            _newData[dataIndex++ + _offset] = (byte)((_bnoData.gyro_y >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte)(_bnoData.gyro_y & 0xFF);
+            _newData[dataIndex++ + _offset] = (byte)(((short)gyroVec.Y >> 8) & 0xFF);
+            _newData[dataIndex++ + _offset] = (byte)((short)gyroVec.Y & 0xFF);
 
-            _bnoData.gyro_z = (short)(gyro_vec.Z * _precision);
-            _newData[dataIndex++ + _offset] = (byte)((_bnoData.gyro_z >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte)(_bnoData.gyro_z & 0xFF);
+            _newData[dataIndex++ + _offset] = (byte)(((short)gyroVec.Z >> 8) & 0xFF);
+            _newData[dataIndex++ + _offset] = (byte)((short)gyroVec.Z & 0xFF);
 
-            var accel_vec = _bnoSensor.read_vector(SerialBNO.Bno055VectorType.Vector_Accelerometer);
 
-            _bnoData.accel_x = (short)(accel_vec.X * _precision);
-            _newData[dataIndex++ + _offset] = (byte)((_bnoData.accel_x >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte)(_bnoData.accel_x & 0xFF);
+            var accelVec = _bnoSensor.read_vector(SerialBNO.Bno055VectorType.Vector_Accelerometer);
+            accelVec.X = (short) (accelVec.X*_precision);
+            accelVec.Y = (short) (accelVec.Y*_precision);
+            accelVec.Z = (short) (accelVec.Z*_precision);
 
-            _bnoData.accel_y = (short)(accel_vec.Y * _precision);
-            _newData[dataIndex++ + _offset] = (byte)((_bnoData.accel_y >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte)(_bnoData.accel_y & 0xFF);
+            _newData[dataIndex++ + _offset] = (byte)(((short)accelVec.X >> 8) & 0xFF);
+            _newData[dataIndex++ + _offset] = (byte)((short)accelVec.X & 0xFF);
 
-            _bnoData.accel_z = (short)(accel_vec.Z * _precision);
-            _newData[dataIndex++ + _offset] = (byte)((_bnoData.accel_z >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte)(_bnoData.accel_z & 0xFF);
+            _newData[dataIndex++ + _offset] = (byte)(((short)accelVec.Y >> 8) & 0xFF);
+            _newData[dataIndex++ + _offset] = (byte)((short)accelVec.Y & 0xFF);
 
-            _bnoData.temp = _bnoSensor.read_signed_byte(SerialBNO.Bno055Registers.Bno055_Temp_Addr);
-            _newData[dataIndex++ + _offset] = (byte)((_bnoData.temp >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte)(_bnoData.temp & 0xFF);
+            _newData[dataIndex++ + _offset] = (byte)(((short)accelVec.Z >> 8) & 0xFF);
+            _newData[dataIndex++ + _offset] = (byte)((short)accelVec.Z & 0xFF);
+
+            var temp = _bnoSensor.read_signed_byte(SerialBNO.Bno055Registers.Bno055_Temp_Addr);
+            _newData[dataIndex++ + _offset] = (byte)((temp >> 8) & 0xFF);
+            _newData[dataIndex++ + _offset] = (byte)(temp & 0xFF);
 
 
             time = RTC.CurrentTime();
             _newData[dataIndex++ + _offset] = time[0];
             _newData[dataIndex++ + _offset] = time[1];
-            _newData[dataIndex++ + _offset] = time[2];
+            _newData[dataIndex + _offset] = time[2];
 
             //Debug.Print("Gyro - <" + _bnoData.gyro_x.ToString("F2") + ", "
             //            + _bnoData.gyro_y.ToString("F2") + ", "

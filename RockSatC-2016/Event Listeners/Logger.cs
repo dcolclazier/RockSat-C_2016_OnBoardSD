@@ -1,5 +1,7 @@
-﻿using System;
+﻿
+using System;
 using System.Collections;
+using System.IO;
 using System.IO.Ports;
 using System.Text;
 using Microsoft.SPOT;
@@ -10,25 +12,34 @@ using RockSatC_2016.Utility;
 
 namespace RockSatC_2016.Event_Listeners {
     public class Logger  {
-        private string _buffer = "";
-        private readonly int _maxBufferSize;
+        //private string _buffer = "";
+        //private readonly int _maxBufferSize;
         private readonly Queue _pendingData = new Queue();
-        private readonly SerialPort _openLogger;
+        //private readonly SerialPort _openLogger;
+
+        private readonly StreamWriter streamWriter;
         private readonly WorkItem _workItem;
-        public int pendingItems => _pendingData.Count;
+        private string _file;
+        public int PendingItems => _pendingData.Count;
 
-        public Logger(string comPort, int baud, int maxBuffer = 512) {
+        public Logger(string comPort, int baud, int maxBuffer = 512, string datafilename = "data.dat")
+        {
 
-            _maxBufferSize = maxBuffer;
+            var dir = Directory.GetCurrentDirectory();
+            _file = Path.Combine(dir, @"\SD" + datafilename);
+            Debug.Print("Logger init in _file: " + _file);
+            
+
+            //_maxBufferSize = maxBuffer;
             Debug.Print("Initializing serial port...");
-            _openLogger = new SerialPort(comPort, baud, Parity.None, 8, StopBits.One);
+            //_openLogger = new SerialPort(comPort, baud, Parity.None, 8, StopBits.One);
             Debug.Print("Serial port initialized... opening serial port.");
-            _openLogger.Open();
+            //_openLogger.Open();
             Debug.Print("Serial port opened.");
 
             Debug.Print("Creating logger thread and adding to pool...");
             var unused = new byte[] {};
-            _workItem = new WorkItem(LogWorker, ref unused, persistent: true, pauseable: false);
+            _workItem = new WorkItem(LogWorker, ref unused, false, persistent: true, pauseable: false);
            
         }
 
@@ -38,7 +49,7 @@ namespace RockSatC_2016.Event_Listeners {
             
             //Debug.Print("Data found to be written...");
             var packet = (QueuePacket)_pendingData.Dequeue();
-            _openLogger.Write(packet.ArrayData,0,packet.ArrayData.Length);
+            File.WriteAllBytes(_file, packet.ArrayData);
 
             //var logEntry = "";
             //    switch (packet.Name) {
@@ -73,24 +84,26 @@ namespace RockSatC_2016.Event_Listeners {
         }
         
         struct QueuePacket {
-            public EventType Name { get; }
-            public IEventData EventData { get; }
+            //public EventType Name { get; }
+            //public IEventData EventData { get; }
             public byte[] ArrayData { get; }
 
-            public QueuePacket(EventType eventName, IEventData eventData, byte[] arrayData) {
-                Name = eventName;
-                EventData = eventData;
+            public QueuePacket(byte[] arrayData) {
+                //Name = eventName;
+                //EventData = eventData;
                 ArrayData = arrayData;
             }
         }
 
-        private void OnDataFound(EventType eventName, IEventData trigger, ref byte[] arrayData) {
-            if (!trigger.loggable) return;
+        private void OnDataFound(bool loggable, ref byte[] arrayData) {
+            if (!loggable) return;
+            if (arrayData.Length == 0) return;
+
             var thisarray = arrayData;
             var count = arrayData.Length;
             arrayData = new byte[count];
             //Debug.Print("Adding to queue... new count: " + _pendingData.Count);
-            _pendingData.Enqueue(new QueuePacket(eventName, trigger, thisarray));
+            _pendingData.Enqueue(new QueuePacket(thisarray));
         }
 
         public void Start() {

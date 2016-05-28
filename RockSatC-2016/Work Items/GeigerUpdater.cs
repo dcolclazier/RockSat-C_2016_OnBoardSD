@@ -14,7 +14,7 @@ namespace RockSatC_2016.Work_Items {
         static readonly InterruptPort ShieldedGeiger = new InterruptPort(Pins.GPIO_PIN_D2, false, Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeHigh);
         static readonly InterruptPort UnshieldedGeiger = new InterruptPort(Pins.GPIO_PIN_D3, false, Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeHigh);
 
-        private readonly GeigerData _geigerData;
+        //private readonly GeigerData _geigerData;
         private readonly WorkItem _workItem;
 
         private int ShieldedCounts { get; set; }
@@ -28,7 +28,7 @@ namespace RockSatC_2016.Work_Items {
         public GeigerUpdater(int dataCount = 4, int sleepInterval = 1000, int metaDataCount = 10)
         {
             _sleepTime = sleepInterval;
-            _geigerData = new GeigerData();
+            //_geigerData = new GeigerData();
             Debug.Print("Adding interrupt action for shielded geiger counter.");
             ShieldedGeiger.OnInterrupt += Shielded_Counter;
 
@@ -45,7 +45,7 @@ namespace RockSatC_2016.Work_Items {
             _newData[3] = (byte)(dataCount & 0xFF);
             _offset = 4;
 
-            _workItem = new WorkItem(GatherCounts, ref _newData, EventType.GeigerUpdate, _geigerData, true, true);
+            _workItem = new WorkItem(GatherCounts, ref _newData, loggable:true, pauseable:true, persistent:true);
         }
 
         private void GatherCounts() {
@@ -59,18 +59,18 @@ namespace RockSatC_2016.Work_Items {
             _newData[dataIndex++ + _offset] = time[1];
             _newData[dataIndex++ + _offset] = time[2];
 
-            _geigerData.shielded_geigerCount = ShieldedCounts;
-            _newData[dataIndex++ + _offset] = (byte)((_geigerData.shielded_geigerCount >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte)(_geigerData.shielded_geigerCount & 0xFF);
+            //_geigerData.shielded_geigerCount = ShieldedCounts;
+            _newData[dataIndex++ + _offset] = (byte)((ShieldedCounts >> 8) & 0xFF);
+            _newData[dataIndex++ + _offset] = (byte)(ShieldedCounts & 0xFF);
 
-            _geigerData.unshielded_geigerCount = UnshieldedCounts;
-            _newData[dataIndex++ + _offset] = (byte)((_geigerData.unshielded_geigerCount >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte)(_geigerData.unshielded_geigerCount & 0xFF);
+            //_geigerData.unshielded_geigerCount = UnshieldedCounts;
+            _newData[dataIndex++ + _offset] = (byte)((UnshieldedCounts >> 8) & 0xFF);
+            _newData[dataIndex++ + _offset] = (byte)(UnshieldedCounts & 0xFF);
 
             time = RTC.CurrentTime();
             _newData[dataIndex++ + _offset] = time[0];
             _newData[dataIndex++ + _offset] = time[1];
-            _newData[dataIndex++ + _offset] = time[2];
+            _newData[dataIndex + _offset] = time[2];
 
             ShieldedCounts = 0;
             UnshieldedCounts = 0;

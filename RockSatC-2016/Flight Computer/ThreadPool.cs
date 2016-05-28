@@ -59,7 +59,7 @@ namespace RockSatC_2016.Utility {
 
                 //nonsafe
                 workItem.Action();
-                if (workItem.EventType != EventType.None) FlightComputer.TriggerEvent(workItem.EventType, workItem.EventData, ref workItem.ArrayData);
+                FlightComputer.TriggerEvent(workItem.Loggable, ref workItem.ArrayData);
                 if (workItem.Persistent) QueueWorkItem(workItem);
 
 
