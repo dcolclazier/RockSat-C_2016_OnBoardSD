@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
@@ -10,7 +9,6 @@ using SecretLabs.NETMF.Hardware.Netduino;
 
 namespace RockSatC_2016.Work_Items
 {
-
     enum PacketType : byte
     {
         StartByte = 0xFF,
@@ -20,6 +18,8 @@ namespace RockSatC_2016.Work_Items
     }
 
     public class AccelUpdater  {
+
+
         private static readonly AnalogInput XPin = new AnalogInput(AnalogChannels.ANALOG_PIN_A0);
         private static readonly AnalogInput YPin = new AnalogInput(AnalogChannels.ANALOG_PIN_A1);
         private static readonly AnalogInput ZPin = new AnalogInput(AnalogChannels.ANALOG_PIN_A2);
@@ -51,9 +51,18 @@ namespace RockSatC_2016.Work_Items
             short x = 0;
             
 
-            _dataArray[0 + _offset] = RTC.Hours();
-            _dataArray[1 + _offset] = RTC.Minutes();
-            _dataArray[2 + _offset] = RTC.Seconds();
+            //_dataArray[0 + _offset] = RTC.Hours();
+            //_dataArray[1 + _offset] = RTC.Minutes();
+            //_dataArray[2 + _offset] = RTC.Seconds();
+
+            _dataArray[0 + _offset] = 0;
+            _dataArray[1 + _offset] = 0;
+            _dataArray[2 + _offset] = 0;
+
+            //Debug.Print("X: " + XPin.Read().ToString());
+            //Debug.Print("Y: " + YPin.Read().ToString());
+            //Debug.Print("Z: " + ZPin.Read().ToString());
+
 
             for (var i = 0; i < _arraySize; i+=2)
             {
@@ -74,7 +83,8 @@ namespace RockSatC_2016.Work_Items
                 //Thread.Sleep(period);
             }
 
-            var time = RTC.CurrentTime();
+            //var time = RTC.CurrentTime();
+            var time = new byte[] {0, 0, 0};
             _dataArray[_arraySize + _offset + 3] = time[0]; //hours
             _dataArray[_arraySize + _offset + 4] = time[1]; //minutes
             _dataArray[_arraySize + _offset + 5] = time[2]; //seconds
@@ -89,29 +99,4 @@ namespace RockSatC_2016.Work_Items
     }
 
     // ReSharper disable once InconsistentNaming
-    internal class RTC
-    {
-        public static byte[] CurrentTime()
-        {
-            return new[]
-            {
-                Hours(),
-                Minutes(),
-                Seconds()
-            };
-        }
-
-        public static byte Hours()
-        {
-            return 0x00;
-        }
-        public static byte Minutes()
-        {
-            return 0x00;
-        }
-        public static byte Seconds()
-        {
-            return 0x00;
-        }
-    }
 }

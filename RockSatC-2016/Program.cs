@@ -2,7 +2,9 @@
 using RockSatC_2016.Drivers;
 using RockSatC_2016.Event_Listeners;
 using RockSatC_2016.Work_Items;
+using SecretLabs.NETMF.Hardware;
 using SecretLabs.NETMF.Hardware.Netduino;
+
 
 namespace RockSatC_2016 {
 
@@ -23,6 +25,8 @@ namespace RockSatC_2016 {
     public static class Program {
        
         public static void Main() {
+            //Configure local time
+
 
             //THIS SECTION CREATES / INITIALIZES THE SERIAL LOGGER
             Debug.Print("Flight computer started successfully. Beginning INIT.");
@@ -39,7 +43,7 @@ namespace RockSatC_2016 {
 
             //THIS SECTION CREATES/INITIALIZES THE GEIGER COUNTER UPDATER
             Debug.Print("Initializing geiger counter collection data");
-            var geigerloop = new GeigerUpdater(1000);
+            var geigerloop = new GeigerUpdater(sleepInterval:30);
 
             //THIS SECTION CREATES/INITIALIZES THE GEIGER COUNTER UPDATER
             Debug.Print("Initializing fast accel dump collector with a size of 12kb");

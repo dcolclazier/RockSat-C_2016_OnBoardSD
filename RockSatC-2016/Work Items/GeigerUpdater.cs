@@ -54,7 +54,8 @@ namespace RockSatC_2016.Work_Items {
 
             var dataIndex = 0;
 
-            var time = RTC.CurrentTime();
+            //var time = RTC.CurrentTime();
+            var time = new byte[] {1, 2, 3};
             _newData[dataIndex++ + _offset] = time[0];
             _newData[dataIndex++ + _offset] = time[1];
             _newData[dataIndex++ + _offset] = time[2];
@@ -67,7 +68,8 @@ namespace RockSatC_2016.Work_Items {
             _newData[dataIndex++ + _offset] = (byte)((UnshieldedCounts >> 8) & 0xFF);
             _newData[dataIndex++ + _offset] = (byte)(UnshieldedCounts & 0xFF);
 
-            time = RTC.CurrentTime();
+            //time = RTC.CurrentTime();
+            //time = new byte[] { 0, 0, 0 };
             _newData[dataIndex++ + _offset] = time[0];
             _newData[dataIndex++ + _offset] = time[1];
             _newData[dataIndex + _offset] = time[2];

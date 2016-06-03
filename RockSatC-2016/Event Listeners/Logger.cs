@@ -15,26 +15,34 @@ namespace RockSatC_2016.Event_Listeners {
         //private string _buffer = "";
         //private readonly int _maxBufferSize;
         private readonly Queue _pendingData = new Queue();
-        //private readonly SerialPort _openLogger;
+        private readonly SerialPort _openLogger;
 
         private readonly StreamWriter streamWriter;
         private readonly WorkItem _workItem;
         private string _file;
         public int PendingItems => _pendingData.Count;
 
-        public Logger(string comPort, int baud, int maxBuffer = 512, string datafilename = "data.dat")
+        public Logger(string comPort, int baud, int maxBuffer = 512)
         {
 
             var dir = Directory.GetCurrentDirectory();
-            _file = Path.Combine(dir, @"\SD" + datafilename);
+            _file = Path.Combine(dir, @"\SD\data.dat");
+            if (File.Exists(_file)) Debug.Print("File exists..");
+            else
+            {
+                Debug.Print("WTF");
+            }
+
+
+
             Debug.Print("Logger init in _file: " + _file);
             
 
             //_maxBufferSize = maxBuffer;
             Debug.Print("Initializing serial port...");
-            //_openLogger = new SerialPort(comPort, baud, Parity.None, 8, StopBits.One);
+            _openLogger = new SerialPort(comPort, baud, Parity.None, 8, StopBits.One);
             Debug.Print("Serial port initialized... opening serial port.");
-            //_openLogger.Open();
+            _openLogger.Open();
             Debug.Print("Serial port opened.");
 
             Debug.Print("Creating logger thread and adding to pool...");
@@ -42,14 +50,29 @@ namespace RockSatC_2016.Event_Listeners {
             _workItem = new WorkItem(LogWorker, ref unused, false, persistent: true, pauseable: false);
            
         }
+        public void AppendAllBytes(byte[] bytes)
+        {
+            //argument-checking here.
 
+            
+           
+        }
         private void LogWorker() {
             if (_pendingData.Count == 0) return;
 
             
             //Debug.Print("Data found to be written...");
             var packet = (QueuePacket)_pendingData.Dequeue();
-            File.WriteAllBytes(_file, packet.ArrayData);
+            //File.WriteAllBytes(_file,packet.ArrayData);
+            using (var stream = new FileStream(_file, FileMode.Append))
+            {
+                stream.Write(packet.ArrayData, 0, packet.ArrayData.Length);
+                Debug.Print("File size:" + stream.Length);
+                var b = System.Text.Encoding.UTF8.GetBytes("dummy data to force StreamWriter data to get written to SD");
+                File.WriteAllBytes(@"\SD\SDdummy.txt", b);
+            }
+
+            //_openLogger.Write(packet.ArrayData, 0, packet.ArrayData.Length);
 
             //var logEntry = "";
             //    switch (packet.Name) {
@@ -65,7 +88,7 @@ namespace RockSatC_2016.Event_Listeners {
             //        case EventType.AccelDump:
             //            var entry = Encoding.UTF8.GetBytes("AD:");
             //            _openLogger.Write(entry,0,entry.Length);
-            //            _openLogger.Write(packet.ArrayData,0,packet.ArrayData.Length);
+            //            _openLogger.Write(packet.packetData,0,packet.packetData.Length);
             //            Debug.Print("Flushed accel byte array directly to SD card...");
             //            return;
             //        case EventType.None:
@@ -80,7 +103,7 @@ namespace RockSatC_2016.Event_Listeners {
             //        _buffer = "";
             //    }
             //    _buffer += logEntry;
-            Debug.Print("Queue After running logworker:  " + _pendingData.Count + " : " + Debug.GC(true));
+            Debug.Print("Queue After running logworker:  " + _pendingData.Count + " : " + Debug.GC(true) + " Filesize: " );
         }
         
         struct QueuePacket {
