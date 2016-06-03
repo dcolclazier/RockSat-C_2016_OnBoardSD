@@ -21,7 +21,7 @@ namespace RockSatC_2016.Work_Items {
         private int UnshieldedCounts { get; set; }
 
         private readonly int _sleepTime;
-        private readonly byte[] _newData;
+        public byte[] Data;
         private readonly int _offset;
 
 
@@ -38,14 +38,14 @@ namespace RockSatC_2016.Work_Items {
             Debug.Print("Creating Threadpool action, repeats every 5 seconds.");
 
 
-            _newData = new byte[dataCount + metaDataCount];
-            _newData[0] = (byte)PacketType.StartByte; // start bit = 0xff
-            _newData[1] = (byte)PacketType.Geiger;
-            _newData[2] = (byte)((dataCount >> 8) & 0xFF);
-            _newData[3] = (byte)(dataCount & 0xFF);
+            Data = new byte[dataCount + metaDataCount];
+            Data[0] = (byte)PacketType.StartByte; // start bit = 0xff
+            Data[1] = (byte)PacketType.Geiger;
+            Data[2] = (byte)((dataCount >> 8) & 0xFF);
+            Data[3] = (byte)(dataCount & 0xFF);
             _offset = 4;
 
-            _workItem = new WorkItem(GatherCounts, ref _newData, loggable:true, pauseable:true, persistent:true);
+            _workItem = new WorkItem(GatherCounts, ref Data, loggable:true, pauseable:true, persistent:true);
         }
 
         private void GatherCounts() {
@@ -56,26 +56,29 @@ namespace RockSatC_2016.Work_Items {
 
             //var time = RTC.CurrentTime();
             var time = new byte[] {1, 2, 3};
-            _newData[dataIndex++ + _offset] = time[0];
-            _newData[dataIndex++ + _offset] = time[1];
-            _newData[dataIndex++ + _offset] = time[2];
+            Data[dataIndex++ + _offset] = time[0];
+            Data[dataIndex++ + _offset] = time[1];
+            Data[dataIndex++ + _offset] = time[2];
 
             //_geigerData.shielded_geigerCount = ShieldedCounts;
-            _newData[dataIndex++ + _offset] = (byte)((ShieldedCounts >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte)(ShieldedCounts & 0xFF);
+            Data[dataIndex++ + _offset] = (byte)((ShieldedCounts >> 8) & 0xFF);
+            Data[dataIndex++ + _offset] = (byte)(ShieldedCounts & 0xFF);
 
             //_geigerData.unshielded_geigerCount = UnshieldedCounts;
-            _newData[dataIndex++ + _offset] = (byte)((UnshieldedCounts >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte)(UnshieldedCounts & 0xFF);
+            Data[dataIndex++ + _offset] = (byte)((UnshieldedCounts >> 8) & 0xFF);
+            Data[dataIndex++ + _offset] = (byte)(UnshieldedCounts & 0xFF);
 
             //time = RTC.CurrentTime();
             //time = new byte[] { 0, 0, 0 };
-            _newData[dataIndex++ + _offset] = time[0];
-            _newData[dataIndex++ + _offset] = time[1];
-            _newData[dataIndex + _offset] = time[2];
+            Data[dataIndex++ + _offset] = time[0];
+            Data[dataIndex++ + _offset] = time[1];
+            Data[dataIndex + _offset] = time[2];
+
+            _workItem.PacketData = Data;
 
             ShieldedCounts = 0;
             UnshieldedCounts = 0;
+            //Debug.Print(_newData.ToString());
 
         }
 

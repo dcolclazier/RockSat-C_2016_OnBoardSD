@@ -68,6 +68,8 @@ namespace RockSatC_2016.Event_Listeners {
             {
                 stream.Write(packet.ArrayData, 0, packet.ArrayData.Length);
                 Debug.Print("File size:" + stream.Length);
+
+
                 var b = System.Text.Encoding.UTF8.GetBytes("dummy data to force StreamWriter data to get written to SD");
                 File.WriteAllBytes(@"\SD\SDdummy.txt", b);
             }
@@ -103,7 +105,7 @@ namespace RockSatC_2016.Event_Listeners {
             //        _buffer = "";
             //    }
             //    _buffer += logEntry;
-            Debug.Print("Queue After running logworker:  " + _pendingData.Count + " : " + Debug.GC(true) + " Filesize: " );
+            Debug.Print("Queue After running logworker:  " + _pendingData.Count + ", FreeMem: " + Debug.GC(true));
         }
         
         struct QueuePacket {

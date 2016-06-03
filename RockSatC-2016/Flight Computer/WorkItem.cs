@@ -12,7 +12,7 @@ namespace RockSatC_2016.Utility
         public readonly IEventData EventData = null;
         public bool Loggable { get; private set; }
 
-        public byte[] PacketData = null;
+        public byte[] PacketData;
 
         private readonly bool _repeatable;
         public bool Persistent { get; set; }

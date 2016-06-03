@@ -90,6 +90,7 @@ namespace RockSatC_2016.Work_Items
             _dataArray[_arraySize + _offset + 5] = time[2]; //seconds
 
             Debug.Print("Accel data dump complete - free mem: " + Debug.GC(true));
+            _workItem.PacketData = _dataArray;
         }
 
         public void Start() {
