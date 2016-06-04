@@ -1,5 +1,8 @@
+using System;
+using System.Diagnostics;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
+using RockSatC_2016.Flight_Computer;
 using RockSatC_2016.Utility;
 using SecretLabs.NETMF.Hardware.Netduino;
 
@@ -10,7 +13,8 @@ namespace RockSatC_2016.Work_Items
         StartByte = 0xFF,
         Geiger = 0x00,
         AccelDump = 0x01,
-        BnoDump = 0x02
+        BnoDump = 0x02,
+        TimeSync = 0x03
     }
 
     public class AccelUpdater  {
@@ -22,62 +26,81 @@ namespace RockSatC_2016.Work_Items
 
         private readonly WorkItem _workItem;
         private readonly byte[] _dataArray;
-        private readonly int _arraySize;
+        private readonly int _dataCount;
         private readonly int _offset;
 
-        public AccelUpdater(int arraySize) {
+        private const int MetaDataCount = 4;
+        private const int TimeDataCount = 16;
+
+        public AccelUpdater(int dataCount) {
             Debug.Print("Initializing Accelerometer data updater");
-            _arraySize = arraySize;
-            _dataArray = new byte[_arraySize + 10]; //3 bytes for each time stamp, 2 for size, 1 for type, 1 for start
+            _dataCount = dataCount;
+            _dataArray = new byte[dataCount + MetaDataCount + TimeDataCount]; //3 bytes for each time stamp, 2 for size, 1 for type, 1 for start
             _workItem = new WorkItem(DumpAccelData, ref _dataArray, loggable:true, persistent:true, pauseable:true);
-            //_frequency = frequency;
 
             //start data packet w/ correct info
             _dataArray[0] = (byte)PacketType.StartByte; // start bit = 0xff
             _dataArray[1] = (byte)PacketType.AccelDump;
-            _dataArray[2] = (byte)((_arraySize >> 8) & 0xFF);
-            _dataArray[3] = (byte)(_arraySize & 0xFF);
+
+            var dataSize = dataCount + TimeDataCount;
+            _dataArray[2] = (byte)((dataSize >> 8) & 0xFF);
+            _dataArray[3] = (byte)(dataSize & 0xFF);
             _offset = 4;
         }
 
         private void DumpAccelData()
         {
-            short x = 0;
-            
+            var currentDataIndex = _offset;
+            //Debug.Print("Accel start millis: " + Stopwatch.Instance.ElapsedMilliseconds);
+            var time = BitConverter.GetBytes(Stopwatch.Instance.ElapsedMilliseconds);
+            Debug.Print("Accel Time start: " + BitConverter.ToInt64(time, 0));
+            _dataArray[currentDataIndex++] = time[0];
+            _dataArray[currentDataIndex++] = time[1];
+            _dataArray[currentDataIndex++] = time[2];
+            _dataArray[currentDataIndex++] = time[3];
+            _dataArray[currentDataIndex++] = time[4];
+            _dataArray[currentDataIndex++] = time[5];
+            _dataArray[currentDataIndex++] = time[6];
+            _dataArray[currentDataIndex++] = time[7];
 
-            //_dataArray[0 + _offset] = RTC.Hours();
-            //_dataArray[1 + _offset] = RTC.Minutes();
-            //_dataArray[2 + _offset] = RTC.Seconds();
-
-            _dataArray[0 + _offset] = 0;
-            _dataArray[1 + _offset] = 0;
-            _dataArray[2 + _offset] = 0;
-
-            for (var i = 0; i < _arraySize; i+=2)
+            for (var i = 0; i < _dataCount/2; i++)
             {
                 short raw = 0;
-                switch (x++%3) {
-                    case 0: raw = (short)(XPin.Read() * 1000);
+                switch (i % 3) {
+                    
+                    case 0:
+                        raw = (short)(XPin.Read() * 1000);
+                        //Debug.Print("0: " +  raw);
                         break;
-                    case 2: raw = (short)(YPin.Read() * 1000);
+                    case 1:
+                        raw = (short)(YPin.Read() * 1000);
+                        //Debug.Print("2: " + raw);
                         break;
-                    case 1: raw = (short)(ZPin.Read() * 1000);
+                    case 2:
+                        raw = (short)(ZPin.Read() * 1000);
+                        ////Debug.Print("1: " + raw);
                         break;
                 }
+                var msb = (byte) ((raw >> 8) & 0xFF);
+                var lsb = (byte) (raw & 0xff);
 
-                _dataArray[i + _offset + 3] = (byte) (raw & 0xFF);
-                _dataArray[i + +_offset + 4] = (byte) ((raw >> 8) & 0xFF);
-                
+                _dataArray[currentDataIndex++] = msb;
+                _dataArray[currentDataIndex++] = lsb;
             }
+            //Debug.Print("Accel stop millis: " + Stopwatch.Instance.ElapsedMilliseconds);
+            time = BitConverter.GetBytes(Stopwatch.Instance.ElapsedMilliseconds);
+            Debug.Print("Accel Time stop: " + BitConverter.ToInt64(time, 0));
+            _dataArray[currentDataIndex++] = time[0];
+            _dataArray[currentDataIndex++] = time[1];
+            _dataArray[currentDataIndex++] = time[2];
+            _dataArray[currentDataIndex++] = time[3];
+            _dataArray[currentDataIndex++] = time[4];
+            _dataArray[currentDataIndex++] = time[5];
+            _dataArray[currentDataIndex++] = time[6];
+            _dataArray[currentDataIndex] = time[7];
 
-            //var time = RTC.CurrentTime();
-            var time = new byte[] {0, 0, 0};
-            _dataArray[_arraySize + _offset + 3] = time[0]; //hours
-            _dataArray[_arraySize + _offset + 4] = time[1]; //minutes
-            _dataArray[_arraySize + _offset + 5] = time[2]; //seconds
-
-            Debug.Print("Accel data dump complete - free mem: " + Debug.GC(true));
             _workItem.PacketData = _dataArray;
+            //Debug.Print("Accel.");
         }
 
         public void Start() {
@@ -85,6 +108,5 @@ namespace RockSatC_2016.Work_Items
         }
         
     }
-
-    // ReSharper disable once InconsistentNaming
+    
 }

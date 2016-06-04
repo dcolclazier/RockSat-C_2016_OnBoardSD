@@ -1,8 +1,4 @@
-﻿using RockSatC_2016.Abstract;
-using RockSatC_2016.Event_Data;
-using RockSatC_2016.Flight_Computer;
-
-namespace RockSatC_2016.Event_Listeners {
+﻿namespace RockSatC_2016.Event_Listeners {
     //public class ExampleListener :  IEventListener
     //{
 

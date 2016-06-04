@@ -1,108 +1,94 @@
 ﻿using System.Threading;
 using Microsoft.SPOT;
-using RockSatC_2016.Abstract;
 using RockSatC_2016.Drivers;
-using RockSatC_2016.Event_Data;
+using RockSatC_2016.Flight_Computer;
 using RockSatC_2016.Utility;
 using SecretLabs.NETMF.Hardware.Netduino;
-using Math = System.Math;
 
 namespace RockSatC_2016.Work_Items {
     public class SerialBnoUpdater {
 
-        private readonly SerialBNO _bnoSensor;
+        private readonly SerialBno _bnoSensor;
 
         //private BNOData _bnoData;
 
         private readonly WorkItem _workItem;
-        private readonly byte[] _newData;
-        private int _dataSize = 14; //7 points of data, 2 bytes each
-        private int _metaDataCount = 10; // 6 bytes of time data, 2 size, 1 start byte, 1 type byte
-        private int _offset = 4;
+        private readonly byte[] _dataArray;
+        private readonly int _dataCount = 14; //7 points of data, 2 bytes each
+        private readonly int _metaDataCount = 4; // 6 bytes of time data, 2 size, 1 start byte, 1 type byte
+        private readonly int _timeDataCount = 8;
+        private readonly int _offset = 4;
         private readonly int _precision;
-        private int _delay;
+        private readonly int _delay;
 
         public SerialBnoUpdater(int sigFigs = 4, int delay = 100) {
 
 
-            _bnoSensor = new SerialBNO(SerialPorts.COM3,5000,5000,SerialBNO.Bno055OpMode.Operation_Mode_Ndof);
-            //_bnoData = new BNOData();
+            _bnoSensor = new SerialBno(SerialPorts.COM3,5000,5000,SerialBno.Bno055OpMode.OperationModeNdof);
 
-            _newData = new byte[_dataSize + _metaDataCount]; 
-            _newData[0] = (byte)PacketType.StartByte; // start bit = 0xff
-            _newData[1] = (byte)PacketType.BnoDump;
-            _newData[2] = (byte)((_dataSize >> 8) & 0xFF);
-            _newData[3] = (byte)(_dataSize & 0xFF);
+            _dataArray = new byte[_dataCount + _metaDataCount + _timeDataCount]; 
+            _dataArray[0] = (byte)PacketType.StartByte; // start bit = 0xff
+            _dataArray[1] = (byte)PacketType.BnoDump;
+
+            var dataSize = _dataCount + _timeDataCount;
+            _dataArray[2] = (byte)((dataSize >> 8) & 0xFF);
+            _dataArray[3] = (byte)(dataSize & 0xFF);
             _delay = delay;
-            _precision = (int)Math.Pow(10, sigFigs - 1);
-            //_precision = 1;
-            //for (int i = 0; i < sigFigs-1; i++)
-            //{
-            //    _precision *= 10;
-            //}
+            _precision = (int)System.Math.Pow(10, sigFigs - 1);
+            
+            _workItem = new WorkItem(GyroUpdater, ref _dataArray, loggable:true, persistent:true, pauseable:true);
 
-
-            _workItem = new WorkItem(GyroUpdater, ref _newData, loggable:true, pauseable:true, persistent:true);
-
-            _bnoSensor.begin();
+            _bnoSensor.Begin();
         }
 
         private void GyroUpdater()
         {
 
-            var dataIndex = 0;
+            var dataIndex = _offset;
 
             var time = new byte[] {0,0,0};
-            _newData[dataIndex++ + _offset] = time[0];
-            _newData[dataIndex++ + _offset] = time[1];
-            _newData[dataIndex++ + _offset] = time[2];
+            _dataArray[dataIndex++] = time[0];
+            _dataArray[dataIndex++] = time[1];
+            _dataArray[dataIndex++] = time[2];
+            _dataArray[dataIndex++] = time[3];
+            _dataArray[dataIndex++] = time[4];
+            _dataArray[dataIndex++] = time[5];
+            _dataArray[dataIndex++] = time[6];
+            _dataArray[dataIndex++] = time[7];
 
-            var gyroVec = _bnoSensor.read_vector(SerialBNO.Bno055VectorType.Vector_Gyroscope);
+            var gyroVec = _bnoSensor.read_vector(SerialBno.Bno055VectorType.VectorGyroscope);
             gyroVec.X = (short) (gyroVec.X*_precision);
             gyroVec.Y = (short) (gyroVec.Y*_precision);
             gyroVec.Z = (short) (gyroVec.Z*_precision);
 
-            _newData[dataIndex++ + _offset] = (byte) (((short)gyroVec.X >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte) ((short)gyroVec.X & 0xFF);
+            _dataArray[dataIndex++] = (byte) (((short)gyroVec.X >> 8) & 0xFF);
+            _dataArray[dataIndex++] = (byte) ((short)gyroVec.X & 0xFF);
 
-            _newData[dataIndex++ + _offset] = (byte)(((short)gyroVec.Y >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte)((short)gyroVec.Y & 0xFF);
+            _dataArray[dataIndex++] = (byte)(((short)gyroVec.Y >> 8) & 0xFF);
+            _dataArray[dataIndex++] = (byte)((short)gyroVec.Y & 0xFF);
 
-            _newData[dataIndex++ + _offset] = (byte)(((short)gyroVec.Z >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte)((short)gyroVec.Z & 0xFF);
+            _dataArray[dataIndex++] = (byte)(((short)gyroVec.Z >> 8) & 0xFF);
+            _dataArray[dataIndex++] = (byte)((short)gyroVec.Z & 0xFF);
 
 
-            var accelVec = _bnoSensor.read_vector(SerialBNO.Bno055VectorType.Vector_Accelerometer);
+            var accelVec = _bnoSensor.read_vector(SerialBno.Bno055VectorType.VectorAccelerometer);
             accelVec.X = (short) (accelVec.X*_precision);
             accelVec.Y = (short) (accelVec.Y*_precision);
             accelVec.Z = (short) (accelVec.Z*_precision);
 
-            _newData[dataIndex++ + _offset] = (byte)(((short)accelVec.X >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte)((short)accelVec.X & 0xFF);
+            _dataArray[dataIndex++] = (byte)(((short)accelVec.X >> 8) & 0xFF);
+            _dataArray[dataIndex++] = (byte)((short)accelVec.X & 0xFF);
 
-            _newData[dataIndex++ + _offset] = (byte)(((short)accelVec.Y >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte)((short)accelVec.Y & 0xFF);
+            _dataArray[dataIndex++] = (byte)(((short)accelVec.Y >> 8) & 0xFF);
+            _dataArray[dataIndex++] = (byte)((short)accelVec.Y & 0xFF);
 
-            _newData[dataIndex++ + _offset] = (byte)(((short)accelVec.Z >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte)((short)accelVec.Z & 0xFF);
+            _dataArray[dataIndex++] = (byte)(((short)accelVec.Z >> 8) & 0xFF);
+            _dataArray[dataIndex++] = (byte)((short)accelVec.Z & 0xFF);
 
-            var temp = _bnoSensor.read_signed_byte(SerialBNO.Bno055Registers.Bno055_Temp_Addr);
-            _newData[dataIndex++ + _offset] = (byte)((temp >> 8) & 0xFF);
-            _newData[dataIndex++ + _offset] = (byte)(temp & 0xFF);
-
-
-            time = new byte[] { 0, 0, 0 };
-            _newData[dataIndex++ + _offset] = time[0];
-            _newData[dataIndex++ + _offset] = time[1];
-            _newData[dataIndex + _offset] = time[2];
-
-            //Debug.Print("Gyro - <" + _bnoData.gyro_x.ToString("F2") + ", "
-            //            + _bnoData.gyro_y.ToString("F2") + ", "
-            //            + _bnoData.gyro_z.ToString("F2") + ">\n" +
-            //            "Accel - <" + _bnoData.accel_x.ToString("F2") + ", "
-            //            + _bnoData.accel_y.ToString("F2") + ", "
-            //            + _bnoData.accel_z.ToString("F2") + ">\n" +
-            //            "Temp: " + _bnoData.temp);
+            var temp = _bnoSensor.read_signed_byte(SerialBno.Bno055Registers.Bno055TempAddr);
+            _dataArray[dataIndex] = (byte)((temp >> 8) & 0xFF);
+            _dataArray[dataIndex] = (byte)(temp & 0xFF);
+            
             Thread.Sleep(_delay);
             Debug.Print("BNO Sensor update complete.");
         }

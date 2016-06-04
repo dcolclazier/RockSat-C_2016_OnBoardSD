@@ -1,7 +1,4 @@
-﻿using Microsoft.SPOT;
-using RockSatC_2016.Abstract;
-using RockSatC_2016.Event_Data;
-using RockSatC_2016.Utility;
+﻿using RockSatC_2016.Utility;
 
 namespace RockSatC_2016.Flight_Computer {
     public class FlightComputer {

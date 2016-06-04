@@ -25,7 +25,7 @@ namespace RockSatC_2016.Utility {
             Y = vec.Y;
             Z = vec.Z;
         }
-        public double magnitude() 
+        public double Magnitude() 
         {
             double res = (W * W) + (X * X) + (Y * Y) + (Z * Z);
             return Math.Sqrt(res);
@@ -36,7 +36,7 @@ namespace RockSatC_2016.Utility {
         //    double mag = magnitude();
         //     scale(1 / mag);
         //}
-        Quaternion conjugate() 
+        Quaternion Conjugate() 
         {
             return new Quaternion {
                 W = W,
@@ -45,7 +45,7 @@ namespace RockSatC_2016.Utility {
                 Z = -Z
             };
         }
-        Vector toEuler() 
+        Vector ToEuler() 
         {
             double sqw = W * W;
             double sqx = X * X;
