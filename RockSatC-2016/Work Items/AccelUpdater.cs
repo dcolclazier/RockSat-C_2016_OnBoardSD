@@ -1,9 +1,5 @@
-using System.Threading;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
-using RockSatC_2016.Abstract;
-using RockSatC_2016.Event_Data;
-using RockSatC_2016.Flight_Computer;
 using RockSatC_2016.Utility;
 using SecretLabs.NETMF.Hardware.Netduino;
 
@@ -24,11 +20,9 @@ namespace RockSatC_2016.Work_Items
         private static readonly AnalogInput YPin = new AnalogInput(AnalogChannels.ANALOG_PIN_A1);
         private static readonly AnalogInput ZPin = new AnalogInput(AnalogChannels.ANALOG_PIN_A2);
 
-        //private readonly AccelData _accelData = new AccelData();
         private readonly WorkItem _workItem;
         private readonly byte[] _dataArray;
         private readonly int _arraySize;
-        //private int _frequency;
         private readonly int _offset;
 
         public AccelUpdater(int arraySize) {
@@ -41,8 +35,8 @@ namespace RockSatC_2016.Work_Items
             //start data packet w/ correct info
             _dataArray[0] = (byte)PacketType.StartByte; // start bit = 0xff
             _dataArray[1] = (byte)PacketType.AccelDump;
-            _dataArray[2] = (byte)(_arraySize & 0xFF);
-            _dataArray[3] = (byte)((_arraySize >> 8) & 0xFF);
+            _dataArray[2] = (byte)((_arraySize >> 8) & 0xFF);
+            _dataArray[3] = (byte)(_arraySize & 0xFF);
             _offset = 4;
         }
 
@@ -59,11 +53,6 @@ namespace RockSatC_2016.Work_Items
             _dataArray[1 + _offset] = 0;
             _dataArray[2 + _offset] = 0;
 
-            //Debug.Print("X: " + XPin.Read().ToString());
-            //Debug.Print("Y: " + YPin.Read().ToString());
-            //Debug.Print("Z: " + ZPin.Read().ToString());
-
-
             for (var i = 0; i < _arraySize; i+=2)
             {
                 short raw = 0;
@@ -78,9 +67,7 @@ namespace RockSatC_2016.Work_Items
 
                 _dataArray[i + _offset + 3] = (byte) (raw & 0xFF);
                 _dataArray[i + +_offset + 4] = (byte) ((raw >> 8) & 0xFF);
-                //var period = 1000*(1/_frequency);
-                //if (period < 1) period = 1;
-                //Thread.Sleep(period);
+                
             }
 
             //var time = RTC.CurrentTime();

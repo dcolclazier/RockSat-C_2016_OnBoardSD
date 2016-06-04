@@ -25,7 +25,7 @@ namespace RockSatC_2016.Work_Items {
         public SerialBnoUpdater(int sigFigs = 4, int delay = 100) {
 
 
-            _bnoSensor = new SerialBNO(SerialPorts.COM4,5000,5000,SerialBNO.Bno055OpMode.Operation_Mode_Ndof);
+            _bnoSensor = new SerialBNO(SerialPorts.COM3,5000,5000,SerialBNO.Bno055OpMode.Operation_Mode_Ndof);
             //_bnoData = new BNOData();
 
             _newData = new byte[_dataSize + _metaDataCount]; 

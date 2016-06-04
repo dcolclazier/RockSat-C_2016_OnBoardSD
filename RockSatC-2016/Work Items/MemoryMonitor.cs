@@ -30,7 +30,11 @@ namespace RockSatC_2016.Work_Items
             Debug.Print("Pausing actions to allow logger to catch up... " + Debug.GC(false));
 
             foreach (WorkItem action in _pauseableWorkItems) action.Stop();
-            while (_logger.PendingItems > 0) ;
+            while (_logger.PendingItems > 0)
+            {
+                Debug.Print("Current item count: " + _logger.PendingItems);
+                Thread.Sleep(5);
+            };
 
             Debug.Print("Resuming paused actions... Current FreeMem: " + Debug.GC(true));
 

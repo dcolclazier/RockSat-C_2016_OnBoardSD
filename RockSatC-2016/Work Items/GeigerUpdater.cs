@@ -78,7 +78,6 @@ namespace RockSatC_2016.Work_Items {
 
             ShieldedCounts = 0;
             UnshieldedCounts = 0;
-            //Debug.Print(_newData.ToString());
 
         }
 

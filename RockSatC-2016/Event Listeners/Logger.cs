@@ -15,14 +15,14 @@ namespace RockSatC_2016.Event_Listeners {
         //private string _buffer = "";
         //private readonly int _maxBufferSize;
         private readonly Queue _pendingData = new Queue();
-        private readonly SerialPort _openLogger;
+        //private readonly SerialPort _openLogger;
 
         private readonly StreamWriter streamWriter;
         private readonly WorkItem _workItem;
         private string _file;
         public int PendingItems => _pendingData.Count;
 
-        public Logger(string comPort, int baud, int maxBuffer = 512)
+        public Logger()
         {
 
             var dir = Directory.GetCurrentDirectory();
@@ -40,9 +40,9 @@ namespace RockSatC_2016.Event_Listeners {
 
             //_maxBufferSize = maxBuffer;
             Debug.Print("Initializing serial port...");
-            _openLogger = new SerialPort(comPort, baud, Parity.None, 8, StopBits.One);
+            //_openLogger = new SerialPort(comPort, baud, Parity.None, 8, StopBits.One);
             Debug.Print("Serial port initialized... opening serial port.");
-            _openLogger.Open();
+            //_openLogger.Open();
             Debug.Print("Serial port opened.");
 
             Debug.Print("Creating logger thread and adding to pool...");
@@ -50,13 +50,7 @@ namespace RockSatC_2016.Event_Listeners {
             _workItem = new WorkItem(LogWorker, ref unused, false, persistent: true, pauseable: false);
            
         }
-        public void AppendAllBytes(byte[] bytes)
-        {
-            //argument-checking here.
-
-            
-           
-        }
+        
         private void LogWorker() {
             if (_pendingData.Count == 0) return;
 
@@ -67,7 +61,7 @@ namespace RockSatC_2016.Event_Listeners {
             using (var stream = new FileStream(_file, FileMode.Append))
             {
                 stream.Write(packet.ArrayData, 0, packet.ArrayData.Length);
-                Debug.Print("File size:" + stream.Length);
+                //Debug.Print("File size:" + stream.Length);
 
 
                 var b = System.Text.Encoding.UTF8.GetBytes("dummy data to force StreamWriter data to get written to SD");
