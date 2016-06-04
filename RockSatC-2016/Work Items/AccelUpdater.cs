@@ -53,7 +53,7 @@ namespace RockSatC_2016.Work_Items
             var currentDataIndex = _offset;
             //Debug.Print("Accel start millis: " + Stopwatch.Instance.ElapsedMilliseconds);
             var time = BitConverter.GetBytes(Stopwatch.Instance.ElapsedMilliseconds);
-            Debug.Print("Accel Time start: " + BitConverter.ToInt64(time, 0));
+            Debug.Print("Accel Time start: " + BitConverter.ToInt64(time, 0) + ":" + Debug.GC(false));
             _dataArray[currentDataIndex++] = time[0];
             _dataArray[currentDataIndex++] = time[1];
             _dataArray[currentDataIndex++] = time[2];
@@ -89,7 +89,7 @@ namespace RockSatC_2016.Work_Items
             }
             //Debug.Print("Accel stop millis: " + Stopwatch.Instance.ElapsedMilliseconds);
             time = BitConverter.GetBytes(Stopwatch.Instance.ElapsedMilliseconds);
-            Debug.Print("Accel Time stop: " + BitConverter.ToInt64(time, 0));
+            //Debug.Print("Accel Time stop: " + BitConverter.ToInt64(time, 0));
             _dataArray[currentDataIndex++] = time[0];
             _dataArray[currentDataIndex++] = time[1];
             _dataArray[currentDataIndex++] = time[2];

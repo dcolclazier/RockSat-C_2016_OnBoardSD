@@ -9,7 +9,7 @@ namespace RockSatC_2016.Work_Items
         private static byte _h;
         private static byte _m;
         private static byte _s;
-
+        private static readonly object locker = new object();
         private const int TransactionTimeout = 1000;
         private const byte ClockRateKHz = 59;
 
@@ -23,6 +23,7 @@ namespace RockSatC_2016.Work_Items
      
         public static byte[] CurrentTime()
         {
+            
             var time = new byte[7];
             I2CBus.GetInstance().ReadRegister(SlaveConfig, 0x00, time ,TransactionTimeout);
 
@@ -43,17 +44,32 @@ namespace System.Diagnostics
     {
         private long _mStartTicks;
         private static Stopwatch _instance;
-
+        private static readonly object locker = new object();
         private const long MTicksPerMillisecond = TimeSpan.TicksPerMillisecond;
 
-        public static Stopwatch Instance => _instance ?? (_instance = new Stopwatch());
+        public static Stopwatch Instance
+        {
+            get
+            {
+                lock(locker)
+                    return _instance ?? (_instance = new Stopwatch());
+            }
+        }
 
         private Stopwatch() { }
         
         public void Start() {
-            _mStartTicks = Utility.GetMachineTime().Ticks; 
+            lock(locker)
+                _mStartTicks = Utility.GetMachineTime().Ticks; 
         }
         
-        public long ElapsedMilliseconds => (Utility.GetMachineTime().Ticks - _mStartTicks) / MTicksPerMillisecond;
+        public long ElapsedMilliseconds
+        {
+            get
+            {
+                lock(locker)
+                   return (Utility.GetMachineTime().Ticks - _mStartTicks)/MTicksPerMillisecond;
+            }
+        }
     }
 }

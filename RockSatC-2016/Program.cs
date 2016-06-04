@@ -21,6 +21,15 @@ namespace RockSatC_2016 {
             Debug.Print("Flight computer started successfully. Beginning INIT.");
 
             var logger = new Logger();
+            Debug.Print("Starting logger...");
+            logger.Start();
+
+            Debug.Print("Starting stopwatch");
+            Stopwatch.Instance.Start();
+
+            //Debug.Print("Recording time-sync packet");
+            //var timeSync = new TimeSync();
+            //timeSync.RunOnce();
 
             //Initializes the RICH on pin D7
             Debug.Print("Initializing RICH detector");
@@ -32,10 +41,10 @@ namespace RockSatC_2016 {
 
             //THIS SECTION CREATES/INITIALIZES THE GEIGER COUNTER UPDATER
             Debug.Print("Initializing geiger counter collection data");
-            var geigerloop = new GeigerUpdater(sleepInterval:50);
+            var geigerloop = new GeigerUpdater(sleepInterval:40);
 
             //THIS SECTION CREATES/INITIALIZES THE GEIGER COUNTER UPDATER
-            var accel_dump_size = 12288;
+            var accel_dump_size = 18432;
             Debug.Print("Initializing fast accel dump collector with a size of " + accel_dump_size + "bytes.");
             var acceldumploop = new AccelUpdater(accel_dump_size);
 
@@ -44,19 +53,6 @@ namespace RockSatC_2016 {
             //THIS SECTION INITIALIZES AND STARTS THE MEMORY MONITOR
             Debug.Print("Starting memory monitor...");
             MemoryMonitor.Instance.Start(ref logger);
-            
-
-            //THIS STARTS THE LOGGER
-            Debug.Print("Starting logger...");
-            logger.Start();
-
-            Debug.Print("Starting stopwatch");
-            Stopwatch.Instance.Start();
-
-            //Debug.Print("Recording time-sync packet");
-            //var timeSync = new TimeSync();
-            //timeSync.RunOnce();
-
 
             //THIS STARTS THE Accel dump update
             Debug.Print("Starting accel dumper...");
