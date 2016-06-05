@@ -14,7 +14,7 @@ namespace RockSatC_2016.Utility {
         private static readonly Queue ThreadActions = new Queue();
         private static readonly ManualResetEvent ThreadSynch = new ManualResetEvent(false);
         private static readonly FlightComputer FlightComputer = FlightComputer.Instance;
-        private const int MaxThreads = 2;
+        private const int MaxThreads = 3;
 
         
         

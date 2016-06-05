@@ -20,13 +20,13 @@ namespace RockSatC_2016.Work_Items {
         private int UnshieldedCounts { get; set; }
 
         private readonly int _sleepTime;
-        public byte[] Data;
+        public byte[] _dataArray;
         private readonly int _offset;
 
         private int _metadataCount = 4; 
         private int _timedataCount = 8; // 1 x 8 bytes
 
-        public GeigerUpdater(int dataCount = 4, int sleepInterval = 1000)
+        public GeigerUpdater(int dataCount = 2, int sleepInterval = 1000)
         {
             _sleepTime = sleepInterval;
             //_geigerData = new GeigerData();
@@ -39,16 +39,16 @@ namespace RockSatC_2016.Work_Items {
             Debug.Print("Creating Threadpool action, repeats every 5 seconds.");
 
 
-            Data = new byte[dataCount + _metadataCount + _timedataCount];
-            Data[0] = (byte)PacketType.StartByte; // start bit = 0xff
-            Data[1] = (byte)PacketType.Geiger;
+            _dataArray = new byte[dataCount + _metadataCount + _timedataCount];
+            _dataArray[0] = (byte)PacketType.StartByte; // start bit = 0xff
+            _dataArray[1] = (byte)PacketType.Geiger;
 
             var dataSize = dataCount + _timedataCount;
-            Data[2] = (byte)((dataSize >> 8) & 0xFF);
-            Data[3] = (byte)(dataSize & 0xFF);
+            _dataArray[2] = (byte)((dataSize >> 8) & 0xFF);
+            _dataArray[3] = (byte)(dataSize & 0xFF);
             _offset = 4;
 
-            _workItem = new WorkItem(GatherCounts, ref Data, loggable:true, pauseable:true, persistent:true);
+            _workItem = new WorkItem(GatherCounts, ref _dataArray, loggable:true, pauseable:true, persistent:true);
         }
 
         private void GatherCounts() {
@@ -57,32 +57,28 @@ namespace RockSatC_2016.Work_Items {
 
             var time = BitConverter.GetBytes(Stopwatch.Instance.ElapsedMilliseconds);
             
-            Data[currentDataIndex++] = time[0];
-            Data[currentDataIndex++] = time[1];
-            Data[currentDataIndex++] = time[2];
-            Data[currentDataIndex++] = time[3];
-            Data[currentDataIndex++] = time[4];
-            Data[currentDataIndex++] = time[5];
-            Data[currentDataIndex++] = time[6];
-            Data[currentDataIndex++] = time[7];
+            _dataArray[currentDataIndex++] = time[0];
+            _dataArray[currentDataIndex++] = time[1];
+            _dataArray[currentDataIndex++] = time[2];
+            _dataArray[currentDataIndex++] = time[3];
+            _dataArray[currentDataIndex++] = time[4];
+            _dataArray[currentDataIndex++] = time[5];
+            _dataArray[currentDataIndex++] = time[6];
+            _dataArray[currentDataIndex++] = time[7];
 
-            Data[currentDataIndex++] = (byte)((ShieldedCounts >> 8) & 0xFF);
-            Data[currentDataIndex++] = (byte)(ShieldedCounts & 0xFF);
 
-            Data[currentDataIndex++] = (byte)((UnshieldedCounts >> 8) & 0xFF);
-            Data[currentDataIndex] = (byte)(UnshieldedCounts & 0xFF);
+            //if we only need 1 byte per update (at 20+ hz)
+            _dataArray[currentDataIndex++] = (byte)ShieldedCounts;
+            _dataArray[currentDataIndex] = (byte)UnshieldedCounts;
 
-            //time = BitConverter.GetBytes(Stopwatch.Instance.ElapsedMilliseconds);
-            //Data[dataIndex++] = time[0];
-            //Data[dataIndex++] = time[1];
-            //Data[dataIndex++] = time[2];
-            //Data[dataIndex++] = time[3];
-            //Data[dataIndex++] = time[4];
-            //Data[dataIndex++] = time[5];
-            //Data[dataIndex++] = time[6];
-            //Data[dataIndex] = time[7];
+            //if we need 2 bytes per update (at 20+hz)
+            //_dataArray[currentDataIndex++] = (byte)((ShieldedCounts >> 8) & 0xFF);
+            //_dataArray[currentDataIndex++] = (byte)(ShieldedCounts & 0xFF);
 
-            _workItem.PacketData = Data;
+            //_dataArray[currentDataIndex++] = (byte)((UnshieldedCounts >> 8) & 0xFF);
+            //_dataArray[currentDataIndex] = (byte)(UnshieldedCounts & 0xFF);
+
+            Array.Copy(_dataArray, _workItem.PacketData, _dataArray.Length);
 
             ShieldedCounts = 0;
             UnshieldedCounts = 0;

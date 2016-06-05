@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.IO;
 using System.Text;
 using Microsoft.SPOT;
@@ -48,7 +49,7 @@ namespace RockSatC_2016.Event_Listeners {
         private void LogWorker() {
             if (_pendingData.Count == 0) return;
             
-            //Debug.Print("Data found to be written...");
+            //Debug.Print("_dataArray found to be written...");
             var packet = (QueuePacket)_pendingData.Dequeue();
             //File.WriteAllBytes(_file,packet.ArrayData);
             using (var stream = new FileStream(_file, FileMode.Append))
@@ -82,11 +83,14 @@ namespace RockSatC_2016.Event_Listeners {
             if (!loggable) return;
             if (arrayData.Length == 0) return;
 
-            var thisarray = arrayData;
-            var count = arrayData.Length;
-            arrayData = new byte[count];
+            var thisArray = new byte[arrayData.Length];
+            Array.Copy(arrayData,thisArray, thisArray.Length);
+
+            //var thisarray = arrayData;
+            //var count = arrayData.Length;
+            //arrayData = new byte[count];
             //Debug.Print("Adding to queue... new count: " + _pendingData.Count);
-            _pendingData.Enqueue(new QueuePacket(thisarray));
+            _pendingData.Enqueue(new QueuePacket(thisArray));
         }
 
         public void Start() {

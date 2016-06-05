@@ -48,12 +48,18 @@ namespace RockSatC_2016.Work_Items
             _offset = 4;
         }
 
+
+        //This is the method that gets run by the threadpool persistently... notice its name is 
+        //listed above as a parameter...
         private void DumpAccelData()
         {
+            //keeps track of the current index in the packet... notice how it increments
+            //    as we continue adding data to it...
             var currentDataIndex = _offset;
-            //Debug.Print("Accel start millis: " + Stopwatch.Instance.ElapsedMilliseconds);
+
+            //get our stopwatch's elapsed ms, stick it in our packet
             var time = BitConverter.GetBytes(Stopwatch.Instance.ElapsedMilliseconds);
-            Debug.Print("Accel Time start: " + BitConverter.ToInt64(time, 0) + ":" + Debug.GC(false));
+            //Debug.Print("Accel Time start: " + BitConverter.ToInt64(time, 0) + ":" + Debug.GC(false));
             _dataArray[currentDataIndex++] = time[0];
             _dataArray[currentDataIndex++] = time[1];
             _dataArray[currentDataIndex++] = time[2];
@@ -63,22 +69,25 @@ namespace RockSatC_2016.Work_Items
             _dataArray[currentDataIndex++] = time[6];
             _dataArray[currentDataIndex++] = time[7];
 
+
+            //anything beyond simply filling RAM with data is S-L-O-W on the .NetMF due to the 
+            // overhead associated with it. 
+            //
+            //The switch statement decides whether we're on x, y, or z... our first index is
+            //0, and 0 % 3 is 0, so it makes sense to store x here...
+            //       1 % 3 is 1, so it makes sense to store y here... and so on.
             for (var i = 0; i < _dataCount/2; i++)
             {
                 short raw = 0;
                 switch (i % 3) {
-                    
                     case 0:
                         raw = (short)(XPin.Read() * 1000);
-                        //Debug.Print("0: " +  raw);
                         break;
                     case 1:
                         raw = (short)(YPin.Read() * 1000);
-                        //Debug.Print("2: " + raw);
                         break;
                     case 2:
                         raw = (short)(ZPin.Read() * 1000);
-                        ////Debug.Print("1: " + raw);
                         break;
                 }
                 var msb = (byte) ((raw >> 8) & 0xFF);
@@ -87,22 +96,26 @@ namespace RockSatC_2016.Work_Items
                 _dataArray[currentDataIndex++] = msb;
                 _dataArray[currentDataIndex++] = lsb;
             }
-            //Debug.Print("Accel stop millis: " + Stopwatch.Instance.ElapsedMilliseconds);
-            time = BitConverter.GetBytes(Stopwatch.Instance.ElapsedMilliseconds);
-            //Debug.Print("Accel Time stop: " + BitConverter.ToInt64(time, 0));
-            _dataArray[currentDataIndex++] = time[0];
-            _dataArray[currentDataIndex++] = time[1];
-            _dataArray[currentDataIndex++] = time[2];
-            _dataArray[currentDataIndex++] = time[3];
-            _dataArray[currentDataIndex++] = time[4];
-            _dataArray[currentDataIndex++] = time[5];
-            _dataArray[currentDataIndex++] = time[6];
-            _dataArray[currentDataIndex] = time[7];
 
-            _workItem.PacketData = _dataArray;
-            //Debug.Print("Accel.");
+            var endTime = BitConverter.GetBytes(Stopwatch.Instance.ElapsedMilliseconds);
+            //Debug.Print("Accel Time stop: " + BitConverter.ToInt64(endTime, 0));
+
+            //last 8 bytes store end time stamp
+            _dataArray[currentDataIndex++] = endTime[0];
+            _dataArray[currentDataIndex++] = endTime[1];
+            _dataArray[currentDataIndex++] = endTime[2];
+            _dataArray[currentDataIndex++] = endTime[3];
+            _dataArray[currentDataIndex++] = endTime[4];
+            _dataArray[currentDataIndex++] = endTime[5];
+            _dataArray[currentDataIndex++] = endTime[6];
+            _dataArray[currentDataIndex] = endTime[7];
+
+            //pass this off to the packet so it gets recorded to the sd card.
+            Array.Copy(_dataArray, _workItem.PacketData, _dataArray.Length);
+            //_workItem.PacketData = _dataArray;
         }
 
+        //called in program.cs to start up the accelerometer sensor logger
         public void Start() {
             _workItem.Start();
         }

@@ -20,7 +20,19 @@ namespace RockSatC_2016.Work_Items
             SlaveConfig = new I2CDevice.Configuration(Address,ClockRateKHz);
         }
 
-     
+        public static void Adjust(byte newHours, byte newMin, byte newSec, byte newDay, byte newMonth, int newYear)
+        {
+            var buffer = new byte[7];
+            buffer[0] = newHours;
+            buffer[1] = newMin;
+            buffer[2] = newSec;
+            buffer[3] = 0x00;
+            buffer[4] = newDay;
+            buffer[5] = newMonth;
+            buffer[6] = (byte)(newYear - 2000);
+            I2CBus.GetInstance().WriteRegister(SlaveConfig, 0x00, buffer, TransactionTimeout);
+        }
+
         public static byte[] CurrentTime()
         {
             
@@ -35,41 +47,5 @@ namespace RockSatC_2016.Work_Items
 
         }
  
-    }
-}
-
-namespace System.Diagnostics
-{
-    internal class Stopwatch
-    {
-        private long _mStartTicks;
-        private static Stopwatch _instance;
-        private static readonly object locker = new object();
-        private const long MTicksPerMillisecond = TimeSpan.TicksPerMillisecond;
-
-        public static Stopwatch Instance
-        {
-            get
-            {
-                lock(locker)
-                    return _instance ?? (_instance = new Stopwatch());
-            }
-        }
-
-        private Stopwatch() { }
-        
-        public void Start() {
-            lock(locker)
-                _mStartTicks = Utility.GetMachineTime().Ticks; 
-        }
-        
-        public long ElapsedMilliseconds
-        {
-            get
-            {
-                lock(locker)
-                   return (Utility.GetMachineTime().Ticks - _mStartTicks)/MTicksPerMillisecond;
-            }
-        }
     }
 }

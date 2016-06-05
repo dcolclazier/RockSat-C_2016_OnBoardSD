@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using Microsoft.SPOT;
 using RockSatC_2016.Drivers;
 using RockSatC_2016.Flight_Computer;
@@ -88,9 +89,11 @@ namespace RockSatC_2016.Work_Items {
             var temp = _bnoSensor.read_signed_byte(SerialBno.Bno055Registers.Bno055TempAddr);
             _dataArray[dataIndex] = (byte)((temp >> 8) & 0xFF);
             _dataArray[dataIndex] = (byte)(temp & 0xFF);
-            
-            Thread.Sleep(_delay);
+
+            Array.Copy(_dataArray, _workItem.PacketData, _dataArray.Length);
+
             Debug.Print("BNO Sensor update complete.");
+            Thread.Sleep(_delay);
         }
 
         public void Start() {

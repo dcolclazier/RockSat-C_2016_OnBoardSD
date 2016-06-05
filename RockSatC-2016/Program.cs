@@ -1,15 +1,20 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using System.Threading;
 using Microsoft.SPOT;
 using RockSatC_2016.Drivers;
 using RockSatC_2016.Event_Listeners;
-using RockSatC_2016.Flight_Computer;
 using RockSatC_2016.Utility;
 using RockSatC_2016.Work_Items;
 
 
 namespace RockSatC_2016 {
-
+    //accel time is off - fixed
+    //geiger counter isn't logging shielded data? - fixed
+    //timewatcher data skewed
+    //need event trigger for launch
+    //need listener for launch trigger - 
+    //debug?
+    //fix data file creation
 
     public static class Program {
        
@@ -27,9 +32,11 @@ namespace RockSatC_2016 {
             Debug.Print("Starting stopwatch");
             Stopwatch.Instance.Start();
 
-            //Debug.Print("Recording time-sync packet");
-            //var timeSync = new TimeSync();
-            //timeSync.RunOnce();
+            Debug.Print("Recording time-sync packet");
+            var timeSync = new TimeSync();
+            timeSync.RunOnce();
+
+            //RTC.Adjust(0,59,0,4,6,2016);
 
             //Initializes the RICH on pin D7
             Debug.Print("Initializing RICH detector");
@@ -48,6 +55,7 @@ namespace RockSatC_2016 {
             Debug.Print("Initializing fast accel dump collector with a size of " + accel_dump_size + "bytes.");
             var acceldumploop = new AccelUpdater(accel_dump_size);
 
+            Thread.Sleep(5000);
             Debug.Print("Flight computer INIT Complete. Continuing with boot.");
 
             //THIS SECTION INITIALIZES AND STARTS THE MEMORY MONITOR
@@ -73,57 +81,6 @@ namespace RockSatC_2016 {
             Debug.Print("Flight computer boot successful.");
         }
 
-    }
-
-    public class TimeSync
-    {
-        private readonly WorkItem _workItem;
-        private readonly byte[] _dataArray;
-        private readonly int _offset;
-
-        public TimeSync()
-        {
-            _dataArray = new byte[18]; // start, type, size, size, hours, minutes, seconds, 8 bytes for millis()
-            _dataArray[0] = (byte) PacketType.StartByte;
-            _dataArray[1] = (byte) PacketType.TimeSync;
-            _dataArray[2] = (byte) 0; //msb for '8' as short- static size 
-            _dataArray[3] = (byte) 8; //lsb for '8' as short- static size
-            _offset = 4;
-
-            _workItem = new WorkItem(SyncTime, ref _dataArray, loggable:true);
-        }
-
-        private void SyncTime()
-        {
-            var dataIndex = 0;
-            var time = RTC.CurrentTime();
-            var millis = BitConverter.GetBytes(Stopwatch.Instance.ElapsedMilliseconds);
-
-            _dataArray[dataIndex++ + _offset] = time[0];
-            _dataArray[dataIndex++ + _offset] = time[1];
-            _dataArray[dataIndex++ + _offset] = time[2];
-
-            _dataArray[dataIndex++ + _offset] = millis[0];
-            _dataArray[dataIndex++ + _offset] = millis[1];
-            _dataArray[dataIndex++ + _offset] = millis[2];
-            _dataArray[dataIndex++ + _offset] = millis[3];
-            _dataArray[dataIndex++ + _offset] = millis[4];
-            _dataArray[dataIndex++ + _offset] = millis[5];
-            _dataArray[dataIndex++ + _offset] = millis[6];
-            _dataArray[dataIndex + _offset] = millis[7];
-
-            time = RTC.CurrentTime();
-            _dataArray[dataIndex++ + _offset] = time[0];
-            _dataArray[dataIndex++ + _offset] = time[1];
-            _dataArray[dataIndex + _offset] = time[2];
-
-            _workItem.PacketData = _dataArray;
-        }
-
-        public void RunOnce()
-        {
-            FlightComputer.Instance.Execute(_workItem);
-        }
     }
 }
 
