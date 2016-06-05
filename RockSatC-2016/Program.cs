@@ -10,17 +10,16 @@ using RockSatC_2016.Work_Items;
 namespace RockSatC_2016 {
     //accel time is off - fixed
     //geiger counter isn't logging shielded data? - fixed
-    //timewatcher data skewed
+    //timewatcher data skewed - time still off, getting accurate time data back though - fixed
+    //seconds data not recording properly - fixed
     //need event trigger for launch
     //need listener for launch trigger - 
     //debug?
-    //fix data file creation
+    //fix data file creation - fixed
 
     public static class Program {
        
         public static void Main() {
-            //Configure local time
-
 
             //THIS SECTION CREATES / INITIALIZES THE SERIAL LOGGER
             Debug.Print("Flight computer started successfully. Beginning INIT.");
@@ -33,10 +32,8 @@ namespace RockSatC_2016 {
             Stopwatch.Instance.Start();
 
             Debug.Print("Recording time-sync packet");
-            var timeSync = new TimeSync();
-            timeSync.RunOnce();
-
-            //RTC.Adjust(0,59,0,4,6,2016);
+            var timeSync = new TimeSync(delay:30000);
+            timeSync.Run();
 
             //Initializes the RICH on pin D7
             Debug.Print("Initializing RICH detector");

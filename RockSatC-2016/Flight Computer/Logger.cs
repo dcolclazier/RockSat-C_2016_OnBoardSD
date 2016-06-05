@@ -20,13 +20,29 @@ namespace RockSatC_2016.Event_Listeners {
         public Logger()
         {
 
-            var dir = Directory.GetCurrentDirectory();
-            _file = Path.Combine(dir, @"\SD\data.dat");
-            if (File.Exists(_file)) Debug.Print("File exists..");
-            else
+            //NEW
+            for (int i = 0; i < 100; i++)
             {
-                Debug.Print("WTF");
+                var prePath = @"\SD\";
+                var postPath = "data.dat" + i;
+                var test = prePath + postPath;
+                var dirTest = Directory.GetCurrentDirectory();
+                var fileTest = Path.Combine(dirTest, test);
+
+                if (File.Exists(fileTest)) continue;
+                _file = fileTest;
+                break;
             }
+            
+
+            //OLD
+            //var dir = Directory.GetCurrentDirectory();
+            //_file = Path.Combine(dir, @"\SD\data.dat");
+            //if (File.Exists(_file)) Debug.Print("File exists..");
+            //else
+            //{
+            //    Debug.Print("WTF");
+            //}
 
 
 
