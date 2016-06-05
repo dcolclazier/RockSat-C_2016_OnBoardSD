@@ -11,9 +11,6 @@ namespace RockSatC_2016.Drivers {
 
         public SerialBno(string comPort, int readTimeout, int writeTimeout, Bno055OpMode mode = Bno055OpMode.OperationModeAccgyro) {
             _mode = mode;
-            Debug.Print("Initialing BNO Serial Port... " + comPort + ", " + Baud + " bps");
-            Debug.Print("ReadTimeout: " + readTimeout);
-            Debug.Print("WriteTimeout: " + writeTimeout);
             _comPort = new SerialPort(comPort, Baud,0,8,StopBits.One) {
                 ReadTimeout = readTimeout,
                 WriteTimeout = writeTimeout

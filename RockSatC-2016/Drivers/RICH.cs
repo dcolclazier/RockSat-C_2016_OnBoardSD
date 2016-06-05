@@ -1,7 +1,6 @@
 using System.Threading;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
-using RockSatC_2016.Utility;
 using SecretLabs.NETMF.Hardware.Netduino;
 
 namespace RockSatC_2016.Drivers

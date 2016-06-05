@@ -1,17 +1,12 @@
-﻿using System.Diagnostics;
-using System.Threading;
+﻿using System.Threading;
 using Microsoft.SPOT;
 using RockSatC_2016.Drivers;
-using RockSatC_2016.Event_Listeners;
-using RockSatC_2016.Utility;
+using RockSatC_2016.Flight_Computer;
 using RockSatC_2016.Work_Items;
+using Timer = RockSatC_2016.Flight_Computer.Timer;
 
 
 namespace RockSatC_2016 {
-    //accel time is off - fixed
-    //geiger counter isn't logging shielded data? - fixed
-    //timewatcher data skewed - time still off, getting accurate time data back though - fixed
-    //seconds data not recording properly - fixed
     //need event trigger for launch
     //need listener for launch trigger - 
     //debug?
@@ -29,7 +24,7 @@ namespace RockSatC_2016 {
             logger.Start();
 
             Debug.Print("Starting stopwatch");
-            Stopwatch.Instance.Start();
+            Timer.Instance.Start();
 
             Debug.Print("Recording time-sync packet");
             var timeSync = new TimeSync(delay:30000);
@@ -41,7 +36,7 @@ namespace RockSatC_2016 {
 
             //THIS SECTION CREATES/INITIALIZES THE SERIAL BNO 100HZ UPDATER
             //Debug.Print("Initializing BNO Sensor on Serial Port COM4, 1 stop bit, 0 parity, 8 data bits");
-            //var bnoloop = new SerialBnoUpdater(sigFigs: 4);
+            var bnoloop = new SerialBnoUpdater(sigFigs: 4);
 
             //THIS SECTION CREATES/INITIALIZES THE GEIGER COUNTER UPDATER
             Debug.Print("Initializing geiger counter collection data");

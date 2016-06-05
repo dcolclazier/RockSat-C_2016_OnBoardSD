@@ -33,22 +33,20 @@
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
     <Compile Include="Drivers\RICH.cs" />
-    <Compile Include="Flight Computer\Stopwatch.cs" />
-    <Compile Include="Flight Computer\WorkItem.cs" />
+    <Compile Include="Utility\Tools.cs" />
+    <Compile Include="Flight Computer\Timer.cs" />
+    <Compile Include="Work Items\WorkItem.cs" />
     <Compile Include="Flight Computer\TimeSync.cs" />
     <Compile Include="Work Items\AccelUpdater.cs" />
-    <Compile Include="Abstract\Action.cs" />
     <Compile Include="Drivers\I2CBus.cs" />
     <Compile Include="Work Items\MemoryMonitor.cs" />
     <Compile Include="Drivers\RTC.cs" />
     <Compile Include="Work Items\SerialBNOUpdater.cs" />
     <Compile Include="Flight Computer\Logger.cs" />
-    <Compile Include="Abstract\IEventData.cs" />
     <Compile Include="Work Items\GeigerUpdater.cs" />
     <Compile Include="Drivers\BMP180.cs" />
     <Compile Include="Drivers\SerialBNO.cs" />
     <Compile Include="Flight Computer\FlightComputer.cs" />
-    <Compile Include="Abstract\EventType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Utility\Quaternion.cs" />

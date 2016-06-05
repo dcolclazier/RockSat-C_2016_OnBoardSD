@@ -1,7 +1,7 @@
 using System.Threading;
-using RockSatC_2016.Work_Items;
+using RockSatC_2016.Flight_Computer;
 
-namespace RockSatC_2016.Flight_Computer
+namespace RockSatC_2016.Work_Items
 {
     public class WorkItem
     {

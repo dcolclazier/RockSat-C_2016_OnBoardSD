@@ -2,10 +2,9 @@
 using System.Collections;
 using System.Threading;
 using Microsoft.SPOT;
-using RockSatC_2016.Abstract;
-using RockSatC_2016.Flight_Computer;
+using RockSatC_2016.Work_Items;
 
-namespace RockSatC_2016.Utility {
+namespace RockSatC_2016.Flight_Computer {
     public static class ThreadPool {
 
 

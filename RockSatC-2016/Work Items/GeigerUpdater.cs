@@ -1,11 +1,9 @@
 using System;
-using System.Diagnostics;
 using System.Threading;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
-using RockSatC_2016.Flight_Computer;
-using RockSatC_2016.Utility;
 using SecretLabs.NETMF.Hardware.Netduino;
+using Timer = RockSatC_2016.Flight_Computer.Timer;
 
 namespace RockSatC_2016.Work_Items {
     public class GeigerUpdater  {
@@ -55,7 +53,7 @@ namespace RockSatC_2016.Work_Items {
             
             var currentDataIndex = _offset;
 
-            var time = BitConverter.GetBytes(Stopwatch.Instance.ElapsedMilliseconds);
+            var time = BitConverter.GetBytes(Timer.Instance.ElapsedMilliseconds);
             
             _dataArray[currentDataIndex++] = time[0];
             _dataArray[currentDataIndex++] = time[1];

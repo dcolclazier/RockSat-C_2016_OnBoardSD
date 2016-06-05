@@ -1,10 +1,9 @@
 using System;
-using System.Diagnostics;
 using System.Threading;
-using RockSatC_2016.Flight_Computer;
+using RockSatC_2016.Drivers;
 using RockSatC_2016.Work_Items;
 
-namespace RockSatC_2016
+namespace RockSatC_2016.Flight_Computer
 {
     public class TimeSync
     {
@@ -30,7 +29,7 @@ namespace RockSatC_2016
         {
             var dataIndex = 0;
             var time = RTC.CurrentTime();
-            var millis = BitConverter.GetBytes(Stopwatch.Instance.ElapsedMilliseconds);
+            var millis = BitConverter.GetBytes(Timer.Instance.ElapsedMilliseconds);
 
             _dataArray[dataIndex++ + _offset] = time[0];
             _dataArray[dataIndex++ + _offset] = time[1];

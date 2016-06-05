@@ -1,9 +1,7 @@
 using System.Collections;
 using System.Threading;
 using Microsoft.SPOT;
-using RockSatC_2016.Event_Listeners;
 using RockSatC_2016.Flight_Computer;
-using RockSatC_2016.Utility;
 
 namespace RockSatC_2016.Work_Items
 {
@@ -25,8 +23,17 @@ namespace RockSatC_2016.Work_Items
 
         private void MonitorMemory()
         {
+            if (!FlightComputer.Launched && _logger.PendingItems > 25)
+                    PauseAction();
+
             if (Debug.GC(true) > 60000) return;
 
+            PauseAction();
+
+        }
+
+        private void PauseAction()
+        {
             Debug.Print("Pausing actions to allow logger to catch up... " + Debug.GC(false));
 
             foreach (WorkItem action in _pauseableWorkItems) action.Stop();
@@ -39,7 +46,6 @@ namespace RockSatC_2016.Work_Items
             Debug.Print("Resuming paused actions... Current FreeMem: " + Debug.GC(true));
 
             foreach (WorkItem action in _pauseableWorkItems) action.Start();
-            
         }
 
         public void RegisterPauseableAction(WorkItem actionToRegister) {

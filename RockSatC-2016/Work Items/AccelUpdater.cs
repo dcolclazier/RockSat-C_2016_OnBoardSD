@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
 using RockSatC_2016.Flight_Computer;
@@ -28,6 +27,8 @@ namespace RockSatC_2016.Work_Items
         private readonly byte[] _dataArray;
         private readonly int _dataCount;
         private readonly int _offset;
+        public bool Launched { get; private set; }
+        private WorkItem _launchItem;
 
         private const int MetaDataCount = 4;
         private const int TimeDataCount = 16;
@@ -38,6 +39,9 @@ namespace RockSatC_2016.Work_Items
             _dataArray = new byte[dataCount + MetaDataCount + TimeDataCount]; //3 bytes for each time stamp, 2 for size, 1 for type, 1 for start
             _workItem = new WorkItem(DumpAccelData, ref _dataArray, loggable:true, persistent:true, pauseable:true);
 
+            var unused = new byte[0];
+            _launchItem = new WorkItem(OnLaunch, ref unused, false, false, false);
+
             //start data packet w/ correct info
             _dataArray[0] = (byte)PacketType.StartByte; // start bit = 0xff
             _dataArray[1] = (byte)PacketType.AccelDump;
@@ -46,6 +50,10 @@ namespace RockSatC_2016.Work_Items
             _dataArray[2] = (byte)((dataSize >> 8) & 0xFF);
             _dataArray[3] = (byte)(dataSize & 0xFF);
             _offset = 4;
+        }
+
+        private void OnLaunch(){
+            
         }
 
 
@@ -58,7 +66,7 @@ namespace RockSatC_2016.Work_Items
             var currentDataIndex = _offset;
 
             //get our stopwatch's elapsed ms, stick it in our packet
-            var time = BitConverter.GetBytes(Stopwatch.Instance.ElapsedMilliseconds);
+            var time = BitConverter.GetBytes(Timer.Instance.ElapsedMilliseconds);
             //Debug.Print("Accel Time start: " + BitConverter.ToInt64(time, 0) + ":" + Debug.GC(false));
             _dataArray[currentDataIndex++] = time[0];
             _dataArray[currentDataIndex++] = time[1];
@@ -88,6 +96,11 @@ namespace RockSatC_2016.Work_Items
                         break;
                     case 2:
                         raw = (short)(ZPin.Read() * 1000);
+                        if (Launched) break;
+                        if (Tools.map(raw, 0, 1, -200, 200) > 5) {
+                            FlightComputer.Launched = true;
+                            Launched = true;
+                        }
                         break;
                 }
                 var msb = (byte) ((raw >> 8) & 0xFF);
@@ -97,7 +110,7 @@ namespace RockSatC_2016.Work_Items
                 _dataArray[currentDataIndex++] = lsb;
             }
 
-            var endTime = BitConverter.GetBytes(Stopwatch.Instance.ElapsedMilliseconds);
+            var endTime = BitConverter.GetBytes(Timer.Instance.ElapsedMilliseconds);
             //Debug.Print("Accel Time stop: " + BitConverter.ToInt64(endTime, 0));
 
             //last 8 bytes store end time stamp

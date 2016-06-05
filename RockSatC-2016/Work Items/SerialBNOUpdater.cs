@@ -2,8 +2,6 @@
 using System.Threading;
 using Microsoft.SPOT;
 using RockSatC_2016.Drivers;
-using RockSatC_2016.Flight_Computer;
-using RockSatC_2016.Utility;
 using SecretLabs.NETMF.Hardware.Netduino;
 
 namespace RockSatC_2016.Work_Items {
@@ -44,7 +42,6 @@ namespace RockSatC_2016.Work_Items {
 
         private void GyroUpdater()
         {
-
             var dataIndex = _offset;
 
             var time = new byte[] {0,0,0};

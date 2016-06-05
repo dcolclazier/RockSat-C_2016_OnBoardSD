@@ -1,7 +1,7 @@
 using System;
 using Microsoft.SPOT.Hardware;
 
-namespace RockSatC_2016.Work_Items
+namespace RockSatC_2016.Drivers
 {
     public class I2CBus : IDisposable
     {
