@@ -16,8 +16,6 @@ namespace RockSatC_2016.Flight_Computer {
 
         public Logger()
         {
-
-            //NEW
             for (int i = 0; i < 100; i++)
             {
                 var prePath = @"\SD\";

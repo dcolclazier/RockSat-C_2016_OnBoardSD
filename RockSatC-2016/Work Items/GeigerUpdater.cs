@@ -2,8 +2,8 @@ using System;
 using System.Threading;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
+using RockSatC_2016.Flight_Computer;
 using SecretLabs.NETMF.Hardware.Netduino;
-using Timer = RockSatC_2016.Flight_Computer.Timer;
 
 namespace RockSatC_2016.Work_Items {
     public class GeigerUpdater  {
@@ -22,7 +22,7 @@ namespace RockSatC_2016.Work_Items {
         private readonly int _offset;
 
         private int _metadataCount = 4; 
-        private int _timedataCount = 8; // 1 x 8 bytes
+        private int _timedataCount = 3; // 1 x 8 bytes
 
         public GeigerUpdater(int dataCount = 2, int sleepInterval = 1000)
         {
@@ -53,16 +53,16 @@ namespace RockSatC_2016.Work_Items {
             
             var currentDataIndex = _offset;
 
-            var time = BitConverter.GetBytes(Timer.Instance.ElapsedMilliseconds);
+            var time = BitConverter.GetBytes(Clock.Instance.ElapsedMilliseconds);
             
             _dataArray[currentDataIndex++] = time[0];
             _dataArray[currentDataIndex++] = time[1];
             _dataArray[currentDataIndex++] = time[2];
-            _dataArray[currentDataIndex++] = time[3];
-            _dataArray[currentDataIndex++] = time[4];
-            _dataArray[currentDataIndex++] = time[5];
-            _dataArray[currentDataIndex++] = time[6];
-            _dataArray[currentDataIndex++] = time[7];
+            //_dataArray[currentDataIndex++] = time[3];
+            //_dataArray[currentDataIndex++] = time[4];
+            //_dataArray[currentDataIndex++] = time[5];
+            //_dataArray[currentDataIndex++] = time[6];
+            //_dataArray[currentDataIndex++] = time[7];
 
 
             //if we only need 1 byte per update (at 20+ hz)

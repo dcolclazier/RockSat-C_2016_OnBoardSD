@@ -2,20 +2,20 @@ using System;
 
 namespace RockSatC_2016.Flight_Computer
 {
-    internal class Timer
+    internal class Clock
     {
         private long _mStartTicks;
-        private static Timer _instance;
+        private static Clock _instance;
         private static readonly object locker = new object();
         private const long MTicksPerMillisecond = TimeSpan.TicksPerMillisecond;
 
-        public static Timer Instance {
+        public static Clock Instance {
             get{
-                lock(locker) return _instance ?? (_instance = new Timer());
+                lock(locker) return _instance ?? (_instance = new Clock());
             }
         }
 
-        private Timer() { }
+        private Clock() { }
         
         public void Start() {
             lock(locker)

@@ -7,7 +7,10 @@ namespace RockSatC_2016.Flight_Computer {
         public static FlightComputer Instance => _instance ?? (_instance = new FlightComputer());
         public static bool Launched { get; set; }
 
-        private FlightComputer() { }
+        private FlightComputer()
+        {
+            Launched = false;
+        }
 
         public void Execute(WorkItem workItem) {
             ThreadPool.QueueWorkItem(workItem);

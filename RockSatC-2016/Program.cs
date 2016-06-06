@@ -3,15 +3,13 @@ using Microsoft.SPOT;
 using RockSatC_2016.Drivers;
 using RockSatC_2016.Flight_Computer;
 using RockSatC_2016.Work_Items;
-using Timer = RockSatC_2016.Flight_Computer.Timer;
 
 
 namespace RockSatC_2016 {
-    //need event trigger for launch
-    //need listener for launch trigger - 
-    //debug?
-    //fix data file creation - fixed
-
+    
+    
+    //debug packets instead of usb debug
+    
     public static class Program {
        
         public static void Main() {
@@ -24,7 +22,7 @@ namespace RockSatC_2016 {
             logger.Start();
 
             Debug.Print("Starting stopwatch");
-            Timer.Instance.Start();
+            Clock.Instance.Start();
 
             Debug.Print("Recording time-sync packet");
             var timeSync = new TimeSync(delay:30000);
@@ -35,8 +33,8 @@ namespace RockSatC_2016 {
             var rich = new Rich();
 
             //THIS SECTION CREATES/INITIALIZES THE SERIAL BNO 100HZ UPDATER
-            //Debug.Print("Initializing BNO Sensor on Serial Port COM4, 1 stop bit, 0 parity, 8 data bits");
-            var bnoloop = new SerialBnoUpdater(sigFigs: 4);
+            Debug.Print("Initializing BNO Sensor ");
+            var bnoloop = new SerialBnoUpdater();
 
             //THIS SECTION CREATES/INITIALIZES THE GEIGER COUNTER UPDATER
             Debug.Print("Initializing geiger counter collection data");
@@ -47,7 +45,7 @@ namespace RockSatC_2016 {
             Debug.Print("Initializing fast accel dump collector with a size of " + accel_dump_size + "bytes.");
             var acceldumploop = new AccelUpdater(accel_dump_size);
 
-            Thread.Sleep(5000);
+            //Thread.Sleep(5000);
             Debug.Print("Flight computer INIT Complete. Continuing with boot.");
 
             //THIS SECTION INITIALIZES AND STARTS THE MEMORY MONITOR
@@ -59,8 +57,8 @@ namespace RockSatC_2016 {
             acceldumploop.Start();
 
             //THIS STARTS THE BNO SENSOR UPDATE
-            //Debug.Print("Starting bno sensor updates...");
-            //bnoloop.Start();
+            Debug.Print("Starting bno sensor updates...");
+            bnoloop.Start();
 
             //THIS STARTS THE Geiger UPDATE.
             Debug.Print("Starting geiger counter data collection...");

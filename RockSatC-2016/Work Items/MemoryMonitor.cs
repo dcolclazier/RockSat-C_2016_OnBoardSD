@@ -13,18 +13,20 @@ namespace RockSatC_2016.Work_Items
         private readonly WorkItem _workItem;
         private readonly ArrayList _pauseableWorkItems = new ArrayList();
         private Logger _logger;
+        private int _preLaunchCount;
 
-        private MemoryMonitor()
+        private MemoryMonitor(int preLaunchPauseCount = 5)
         {
             var unused = new byte[] {};
             _workItem = new WorkItem(MonitorMemory,ref unused, loggable:false, persistent:true, pauseable:false );
-            
+            _preLaunchCount = preLaunchPauseCount;
         }
 
         private void MonitorMemory()
         {
-            if (!FlightComputer.Launched && _logger.PendingItems > 25)
-                    PauseAction();
+            //bug - ENABLE FOR FLIGHT
+            //if (!FlightComputer.Launched && _logger.PendingItems > _preLaunchCount)
+            //        PauseAction();
 
             if (Debug.GC(true) > 60000) return;
 
@@ -34,16 +36,20 @@ namespace RockSatC_2016.Work_Items
 
         private void PauseAction()
         {
-            Debug.Print("Pausing actions to allow logger to catch up... " + Debug.GC(false));
+            Debug.Print("RAM critically low... pausing actions.  Freemem: " + Debug.GC(true) + "  TimeStamp: " + Clock.Instance.ElapsedMilliseconds);
 
             foreach (WorkItem action in _pauseableWorkItems) action.Stop();
+            //var currentCount = _logger.PendingItems;
             while (_logger.PendingItems > 0)
             {
-                Debug.Print("Current item count: " + _logger.PendingItems);
-                Thread.Sleep(5);
-            };
+                //if (currentCount != _logger.PendingItems) {
+                //    currentCount = _logger.PendingItems;
+                //    Debug.Print("Current item count: " + currentCount);
+                //}
+                //Thread.Sleep(5);
+            }
 
-            Debug.Print("Resuming paused actions... Current FreeMem: " + Debug.GC(true));
+            Debug.Print("Resuming paused actions... Current FreeMem: " + Debug.GC(false) + "  TimeStamp: " + Clock.Instance.ElapsedMilliseconds);
 
             foreach (WorkItem action in _pauseableWorkItems) action.Start();
         }

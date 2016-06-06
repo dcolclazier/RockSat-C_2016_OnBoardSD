@@ -44,7 +44,7 @@ namespace RockSatC_2016.Drivers
             var minutes = Tools.Bcd2Bin(new [] { time[1] });
             var hours = Tools.Bcd2Bin(new [] { time[2] });
 
-            Debug.Print("Current time: " + hours + ":" + minutes + ":" + realseconds + ":" + time[3] + ":" + time[4] + ":" + time[5] + ":" + time[6]);
+            Debug.Print("Current time: " + hours + ":" + minutes + ":" + realseconds);
             return new[]
             {
                 (byte)hours,

@@ -27,13 +27,15 @@ namespace RockSatC_2016.Work_Items
         private readonly byte[] _dataArray;
         private readonly int _dataCount;
         private readonly int _offset;
-        public bool Launched { get; private set; }
         private WorkItem _launchItem;
+        private readonly double _zLaunchThreshold;
 
         private const int MetaDataCount = 4;
-        private const int TimeDataCount = 16;
+        private const int TimeDataCount = 6;
 
-        public AccelUpdater(int dataCount) {
+        public AccelUpdater(int dataCount, float zLaunchThreshold = 2.5f)
+        {
+            _zLaunchThreshold = zLaunchThreshold;
             Debug.Print("Initializing Accelerometer data updater");
             _dataCount = dataCount;
             _dataArray = new byte[dataCount + MetaDataCount + TimeDataCount]; //3 bytes for each time stamp, 2 for size, 1 for type, 1 for start
@@ -66,17 +68,16 @@ namespace RockSatC_2016.Work_Items
             var currentDataIndex = _offset;
 
             //get our stopwatch's elapsed ms, stick it in our packet
-            var time = BitConverter.GetBytes(Timer.Instance.ElapsedMilliseconds);
+            var time = BitConverter.GetBytes(Clock.Instance.ElapsedMilliseconds);
             //Debug.Print("Accel Time start: " + BitConverter.ToInt64(time, 0) + ":" + Debug.GC(false));
             _dataArray[currentDataIndex++] = time[0];
             _dataArray[currentDataIndex++] = time[1];
             _dataArray[currentDataIndex++] = time[2];
-            _dataArray[currentDataIndex++] = time[3];
-            _dataArray[currentDataIndex++] = time[4];
-            _dataArray[currentDataIndex++] = time[5];
-            _dataArray[currentDataIndex++] = time[6];
-            _dataArray[currentDataIndex++] = time[7];
-
+            //_dataArray[currentDataIndex++] = time[3];
+            //_dataArray[currentDataIndex++] = time[4];
+            //_dataArray[currentDataIndex++] = time[5];
+            //_dataArray[currentDataIndex++] = time[6];
+            //_dataArray[currentDataIndex++] = time[7];
 
             //anything beyond simply filling RAM with data is S-L-O-W on the .NetMF due to the 
             // overhead associated with it. 
@@ -96,10 +97,11 @@ namespace RockSatC_2016.Work_Items
                         break;
                     case 2:
                         raw = (short)(ZPin.Read() * 1000);
-                        if (Launched) break;
-                        if (Tools.map(raw, 0, 1, -200, 200) > 5) {
+                        if (FlightComputer.Launched) break;
+
+                        if (Tools.map((short) (raw/1000), 0, 1, -200, 200) > _zLaunchThreshold) {
+                            Debug.Print("Launch detected!");
                             FlightComputer.Launched = true;
-                            Launched = true;
                         }
                         break;
                 }
@@ -110,18 +112,18 @@ namespace RockSatC_2016.Work_Items
                 _dataArray[currentDataIndex++] = lsb;
             }
 
-            var endTime = BitConverter.GetBytes(Timer.Instance.ElapsedMilliseconds);
+            time = BitConverter.GetBytes(Clock.Instance.ElapsedMilliseconds);
             //Debug.Print("Accel Time stop: " + BitConverter.ToInt64(endTime, 0));
 
             //last 8 bytes store end time stamp
-            _dataArray[currentDataIndex++] = endTime[0];
-            _dataArray[currentDataIndex++] = endTime[1];
-            _dataArray[currentDataIndex++] = endTime[2];
-            _dataArray[currentDataIndex++] = endTime[3];
-            _dataArray[currentDataIndex++] = endTime[4];
-            _dataArray[currentDataIndex++] = endTime[5];
-            _dataArray[currentDataIndex++] = endTime[6];
-            _dataArray[currentDataIndex] = endTime[7];
+            _dataArray[currentDataIndex++] = time[0];
+            _dataArray[currentDataIndex++] = time[1];
+            _dataArray[currentDataIndex] = time[2];
+            //_dataArray[currentDataIndex++] = time[3];
+            //_dataArray[currentDataIndex++] = time[4];
+            //_dataArray[currentDataIndex++] = time[5];
+            //_dataArray[currentDataIndex++] = time[6];
+            //_dataArray[currentDataIndex] = time[7];
 
             //pass this off to the packet so it gets recorded to the sd card.
             Array.Copy(_dataArray, _workItem.PacketData, _dataArray.Length);

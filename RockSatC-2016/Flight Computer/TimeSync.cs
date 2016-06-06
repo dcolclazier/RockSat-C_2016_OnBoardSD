@@ -29,7 +29,7 @@ namespace RockSatC_2016.Flight_Computer
         {
             var dataIndex = 0;
             var time = RTC.CurrentTime();
-            var millis = BitConverter.GetBytes(Timer.Instance.ElapsedMilliseconds);
+            var millis = BitConverter.GetBytes(Clock.Instance.ElapsedMilliseconds);
 
             _dataArray[dataIndex++ + _offset] = time[0];
             _dataArray[dataIndex++ + _offset] = time[1];
