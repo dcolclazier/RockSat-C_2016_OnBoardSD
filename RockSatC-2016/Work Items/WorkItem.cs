@@ -5,12 +5,13 @@ namespace RockSatC_2016.Work_Items
 {
     public class WorkItem
     {
-        public readonly ThreadStart Action = null;
+        public readonly ThreadStart Action;
 
         public bool Loggable { get; private set; }
         public byte[] PacketData;
 
         private readonly bool _repeatable;
+        private readonly object _locker = new object();
         public bool Persistent { get; set; }
         public bool Pauseable { get; set; }
 
@@ -30,13 +31,18 @@ namespace RockSatC_2016.Work_Items
 
         public void Start()
         {
-            if (_repeatable) Persistent = true;
-            FlightComputer.Instance.Execute(this);
+            lock (_locker)
+            {
+                if (_repeatable) Persistent = true;
+                FlightComputer.Instance.Execute(this);
+            }
         }
+    
 
         public void Stop()
         {
-            Persistent = false;
+            lock(_locker)
+                Persistent = false;
         }
 
     }

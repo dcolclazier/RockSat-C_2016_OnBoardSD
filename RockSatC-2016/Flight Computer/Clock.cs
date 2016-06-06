@@ -6,25 +6,27 @@ namespace RockSatC_2016.Flight_Computer
     {
         private long _mStartTicks;
         private static Clock _instance;
-        private static readonly object locker = new object();
+        private static readonly object Locker = new object();
         private const long MTicksPerMillisecond = TimeSpan.TicksPerMillisecond;
 
         public static Clock Instance {
             get{
-                lock(locker) return _instance ?? (_instance = new Clock());
+                lock(Locker) return _instance ?? (_instance = new Clock());
             }
         }
 
         private Clock() { }
         
         public void Start() {
-            lock(locker)
+            lock(Locker)
                 _mStartTicks = Microsoft.SPOT.Hardware.Utility.GetMachineTime().Ticks; 
         }
         
         public long ElapsedMilliseconds {
-            get {
-                lock(locker)
+            get
+            {
+                if (_mStartTicks == 0) Start();
+                lock(Locker)
                     return (Microsoft.SPOT.Hardware.Utility.GetMachineTime().Ticks - _mStartTicks)/MTicksPerMillisecond;
             }
         }

@@ -1,5 +1,5 @@
-using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
+using RockSatC_2016.Flight_Computer;
 using RockSatC_2016.Utility;
 
 namespace RockSatC_2016.Drivers
@@ -8,10 +8,6 @@ namespace RockSatC_2016.Drivers
     internal static class RTC
     {
         private static readonly I2CDevice.Configuration SlaveConfig;
-        private static byte _h;
-        private static byte _m;
-        private static byte _s;
-        private static readonly object locker = new object();
         private const int TransactionTimeout = 1000;
         private const byte ClockRateKHz = 59;
 
@@ -44,7 +40,7 @@ namespace RockSatC_2016.Drivers
             var minutes = Tools.Bcd2Bin(new [] { time[1] });
             var hours = Tools.Bcd2Bin(new [] { time[2] });
 
-            Debug.Print("Current time: " + hours + ":" + minutes + ":" + realseconds);
+            //Debug.Print("Current time: " + hours + ":" + minutes + ":" + realseconds);
             return new[]
             {
                 (byte)hours,

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Threading;
-using Microsoft.SPOT;
+using RockSatC_2016.Drivers;
 using RockSatC_2016.Work_Items;
 
 namespace RockSatC_2016.Flight_Computer {
@@ -25,7 +25,7 @@ namespace RockSatC_2016.Flight_Computer {
                 }
                 //if we have less ThreadWorkers working than our MaxThreads, go ahead and spin one up.
                 if (AvailableThreads.Count < MaxThreads) {
-                    Debug.Print("Threadpool spooling up additional thread...");
+                    //Debug.Print("Threadpool spooling up additional thread...");
                     var thread = new Thread(ThreadWorker);
                     AvailableThreads.Add(thread);
                     thread.Start();
@@ -55,13 +55,14 @@ namespace RockSatC_2016.Flight_Computer {
                 //if no action, go back to waiting.
                 if (workItem?.Action == null) continue;
 
+                //unsafe
                 workItem.Action();
                 FlightComputer.TriggerEvent(workItem.Loggable, ref workItem.PacketData);
                 if (workItem.Persistent) QueueWorkItem(workItem);
 
 
                 //Debug.Print("Current Thread Queue count: " + ThreadActions.Count);
-                ////safe
+                //safe - make sure to enable for flight.
                 //try
                 //{
                 //    //try to execute, then trigger any events, then re-add to queue if repeatable.
@@ -73,9 +74,10 @@ namespace RockSatC_2016.Flight_Computer {
                 //{
                 //    Debug.Print("ThreadPool: Unhandled error executing action - " + e.Message + e.InnerException);
                 //    Debug.Print("StackTrace: " + e.StackTrace);
-                //    //maybe just reset the flight computer?
+                //    //bug -  maybe just reset the flight computer?
                 //}
             }
+            // ReSharper disable once FunctionNeverReturns
         }
     }
 }

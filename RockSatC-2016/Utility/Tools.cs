@@ -17,7 +17,7 @@ namespace RockSatC_2016.Utility
             return result;
         }
 
-        public static float map(float original, float fromLo, float fromHi, float toLow, float toHigh)
+        public static float Map(float original, float fromLo, float fromHi, float toLow, float toHigh)
         {
             return (original - fromLo)*((toHigh - toLow)/(fromHi - fromLo) + fromLo);
         }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using System.Text;
 using Microsoft.SPOT;
+using RockSatC_2016.Drivers;
 using RockSatC_2016.Work_Items;
 
 namespace RockSatC_2016.Flight_Computer {
@@ -26,8 +27,8 @@ namespace RockSatC_2016.Flight_Computer {
                 _file = fileTest;
                 break;
             }
-            Debug.Print("Logger set up to use file: " + _file);
-            Debug.Print("Creating logger work item...");
+            //Debug.Print("Logger set up to use file: " + _file);
+            //Debug.Print("Creating logger work item...");
 
             var unused = new byte[] {};
             _workItem = new WorkItem(LogWorker, ref unused, false, persistent: true);
@@ -53,6 +54,11 @@ namespace RockSatC_2016.Flight_Computer {
             public QueuePacket(byte[] arrayData) {
                 ArrayData = arrayData;
             }
+        }
+
+        public void AddPacket(ref byte[] arrayData)
+        {
+            OnDataFound(true, ref arrayData);
         }
 
         private void OnDataFound(bool loggable, ref byte[] arrayData) {

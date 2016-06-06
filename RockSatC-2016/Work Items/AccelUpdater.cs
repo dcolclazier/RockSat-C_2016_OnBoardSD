@@ -1,6 +1,7 @@
 using System;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
+using RockSatC_2016.Drivers;
 using RockSatC_2016.Flight_Computer;
 using RockSatC_2016.Utility;
 using SecretLabs.NETMF.Hardware.Netduino;
@@ -13,7 +14,8 @@ namespace RockSatC_2016.Work_Items
         Geiger = 0x00,
         AccelDump = 0x01,
         BnoDump = 0x02,
-        TimeSync = 0x03
+        TimeSync = 0x03,
+        DebugMessage = 0x04
     }
 
     public class AccelUpdater  {
@@ -26,11 +28,9 @@ namespace RockSatC_2016.Work_Items
         private readonly WorkItem _workItem;
         private readonly byte[] _dataArray;
         private readonly int _dataCount;
-        private readonly int _offset;
-        private WorkItem _launchItem;
         private readonly double _zLaunchThreshold;
 
-        private const int MetaDataCount = 4;
+        private const int MetaDataCount = 2;
         private const int TimeDataCount = 6;
 
         public AccelUpdater(int dataCount, float zLaunchThreshold = 2.5f)
@@ -41,21 +41,13 @@ namespace RockSatC_2016.Work_Items
             _dataArray = new byte[dataCount + MetaDataCount + TimeDataCount]; //3 bytes for each time stamp, 2 for size, 1 for type, 1 for start
             _workItem = new WorkItem(DumpAccelData, ref _dataArray, loggable:true, persistent:true, pauseable:true);
 
-            var unused = new byte[0];
-            _launchItem = new WorkItem(OnLaunch, ref unused, false, false, false);
-
             //start data packet w/ correct info
             _dataArray[0] = (byte)PacketType.StartByte; // start bit = 0xff
             _dataArray[1] = (byte)PacketType.AccelDump;
 
-            var dataSize = dataCount + TimeDataCount;
-            _dataArray[2] = (byte)((dataSize >> 8) & 0xFF);
-            _dataArray[3] = (byte)(dataSize & 0xFF);
-            _offset = 4;
-        }
-
-        private void OnLaunch(){
-            
+            //var dataSize = dataCount + TimeDataCount;
+            //_dataArray[2] = (byte)((dataSize >> 8) & 0xFF);
+            //_dataArray[3] = (byte)(dataSize & 0xFF);
         }
 
 
@@ -65,7 +57,7 @@ namespace RockSatC_2016.Work_Items
         {
             //keeps track of the current index in the packet... notice how it increments
             //    as we continue adding data to it...
-            var currentDataIndex = _offset;
+            var currentDataIndex = MetaDataCount;
 
             //get our stopwatch's elapsed ms, stick it in our packet
             var time = BitConverter.GetBytes(Clock.Instance.ElapsedMilliseconds);
@@ -73,11 +65,7 @@ namespace RockSatC_2016.Work_Items
             _dataArray[currentDataIndex++] = time[0];
             _dataArray[currentDataIndex++] = time[1];
             _dataArray[currentDataIndex++] = time[2];
-            //_dataArray[currentDataIndex++] = time[3];
-            //_dataArray[currentDataIndex++] = time[4];
-            //_dataArray[currentDataIndex++] = time[5];
-            //_dataArray[currentDataIndex++] = time[6];
-            //_dataArray[currentDataIndex++] = time[7];
+          
 
             //anything beyond simply filling RAM with data is S-L-O-W on the .NetMF due to the 
             // overhead associated with it. 
@@ -99,7 +87,7 @@ namespace RockSatC_2016.Work_Items
                         raw = (short)(ZPin.Read() * 1000);
                         if (FlightComputer.Launched) break;
 
-                        if (Tools.map((short) (raw/1000), 0, 1, -200, 200) > _zLaunchThreshold) {
+                        if (Tools.Map((short) (raw/1000), 0, 1, -200, 200) > _zLaunchThreshold) {
                             Debug.Print("Launch detected!");
                             FlightComputer.Launched = true;
                         }
