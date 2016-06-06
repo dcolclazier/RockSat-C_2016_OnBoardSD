@@ -6,7 +6,6 @@ namespace RockSatC_2016.Flight_Computer {
         private static FlightComputer _instance;
         public static FlightComputer Instance => _instance ?? (_instance = new FlightComputer());
         public static bool Launched { get; set; }
-        public static Logger Logger { get; set; }
 
         private FlightComputer()
         {

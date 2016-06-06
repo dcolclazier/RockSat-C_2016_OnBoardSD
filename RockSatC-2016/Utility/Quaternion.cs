@@ -19,12 +19,12 @@ namespace RockSatC_2016.Utility {
             Z = iz;
         }
 
-        //private Quaternion(double w, Vector vec) {
-        //    W = w;
-        //    X = vec.X;
-        //    Y = vec.Y;
-        //    Z = vec.Z;
-        //}
+        private Quaternion(double w, Vector vec) {
+            W = w;
+            X = vec.X;
+            Y = vec.Y;
+            Z = vec.Z;
+        }
         public double Magnitude() 
         {
             double res = (W * W) + (X * X) + (Y * Y) + (Z * Z);
@@ -35,31 +35,31 @@ namespace RockSatC_2016.Utility {
         //{
         //    double mag = magnitude();
         //     scale(1 / mag);
-        ////}
-        //Quaternion Conjugate() 
-        //{
-        //    return new Quaternion {
-        //        W = W,
-        //        X = -X,
-        //        Y = -Y,
-        //        Z = -Z
-        //    };
-        ////}
-        //Vector ToEuler() 
-        //{
-        //    double sqw = W * W;
-        //    double sqx = X * X;
-        //    double sqy = Y * Y;
-        //    double sqz = Z * Z;
-
-        //    var ret = new Vector {
-        //        X = (float)Math.Atan2((2.0*(X*Y + Z*W)), (sqx - sqy - sqz + sqw)),
-        //        Y = (float)Math.Asin(-2.0*(X*Z - Y*W)/(sqx + sqy + sqz + sqw)),
-        //        Z = (float)Math.Atan2(2.0*(Y*Z + X*W), (-sqx - sqy + sqz + sqw))
-        //    };
-
-        //    return ret;
         //}
+        Quaternion Conjugate() 
+        {
+            return new Quaternion {
+                W = W,
+                X = -X,
+                Y = -Y,
+                Z = -Z
+            };
+        }
+        Vector ToEuler() 
+        {
+            double sqw = W * W;
+            double sqx = X * X;
+            double sqy = Y * Y;
+            double sqz = Z * Z;
+
+            var ret = new Vector {
+                X = (float)Math.Atan2((2.0*(X*Y + Z*W)), (sqx - sqy - sqz + sqw)),
+                Y = (float)Math.Asin(-2.0*(X*Z - Y*W)/(sqx + sqy + sqz + sqw)),
+                Z = (float)Math.Atan2(2.0*(Y*Z + X*W), (-sqx - sqy + sqz + sqw))
+            };
+
+            return ret;
+        }
         //void scale(double scalar) 
         //{
         //Quaternion ret;

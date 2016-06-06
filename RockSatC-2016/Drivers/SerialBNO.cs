@@ -1,48 +1,12 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.IO.Ports;
 using System.Text;
 using System.Threading;
 using Microsoft.SPOT;
-using RockSatC_2016.Flight_Computer;
 using RockSatC_2016.Utility;
-using RockSatC_2016.Work_Items;
 
 namespace RockSatC_2016.Drivers {
-
-    public static class Rebug
-    {
-
-        private static int _metaDataCount = 4;
-        private static int _timeDataCount = 3;
-
-        public static void Print(string what)
-        {
-            var bytes = Encoding.UTF8.GetBytes(what);
-            var packet = new byte[bytes.Length + _metaDataCount + _timeDataCount];
-            packet[0] = (byte)PacketType.StartByte;
-            packet[1] = (byte) PacketType.DebugMessage;
-
-            var size = bytes.Length + _timeDataCount;
-            var msb = (byte)((size >> 8) & 0xFF);
-            var lsb = (byte)(size & 0xff);
-            packet[2] = msb;
-            packet[3] = lsb;
-
-            var time = BitConverter.GetBytes(Clock.Instance.ElapsedMilliseconds);
-            packet[4] = time[0];
-            packet[5] = time[1];
-            packet[6] = time[2];
-
-            for (int i = 7; i < packet.Length; i++)
-                packet[i] = bytes[i - 7];
-            FlightComputer.Logger.AddPacket(ref packet);
-        }
-
-        
-    }
-
-
+    
     public class SerialBno {
 
         public SerialBno(string comPort, int readTimeout, int writeTimeout, Bno055OpMode mode = Bno055OpMode.OperationModeAccgyro) {
@@ -102,7 +66,7 @@ namespace RockSatC_2016.Drivers {
                     modifier = 900.0f;
                     break;
             }
-            return new Vector
+            return new Vector()
             {
                 X = rawResult[0] / modifier,
                 Y = rawResult[1] / modifier,
@@ -120,7 +84,7 @@ namespace RockSatC_2016.Drivers {
             if (!ack) return null;
             
             //wait for serial stream to fill with expected ack data
-            Thread.Sleep(100); //bug THIS THIS SLOW... should wait until correct amount of data is ready to be read.
+            Thread.Sleep(65); //bug THIS THIS SLOW... should wait until correct amount of data is ready to be read.
             
             var response = new byte[_comPort.BytesToRead];
             var readCount = _comPort.Read(response, 0, response.Length);
@@ -132,9 +96,9 @@ namespace RockSatC_2016.Drivers {
             //if we tried 5 times to get a non-error ACK and didn't, throw an exception.
             if (++tries == maxTries)
                 throw new IOException("Exceeded max tries to acknowlege serial command without bus error.");
-            var expected = expectedLength;
 
-            return serial_send(command, expected, maxTries:maxTries, tries:tries);
+
+            return serial_send(command, expectedLength, maxTries:maxTries, tries:tries);
         }
 
         private void write_byte(Bno055Registers reg, byte data, bool ack = true) {
@@ -243,6 +207,7 @@ namespace RockSatC_2016.Drivers {
         private const int Baud = 115200;
         private readonly SerialPort _comPort;
         private readonly Bno055OpMode _mode;
+        private static readonly object Locker = new object();
 
         #region BNO055 Registers
         public enum Bno055Registers : byte
@@ -397,8 +362,8 @@ namespace RockSatC_2016.Drivers {
         private enum Bno055PowerMode : byte
         {
             PowerModeNormal = 0X00,
-            //PowerModeLowpower = 0X01,
-            //PowerModeSuspend = 0X02
+            PowerModeLowpower = 0X01,
+            PowerModeSuspend = 0X02
         }
         public enum Bno055OpMode : byte
         {

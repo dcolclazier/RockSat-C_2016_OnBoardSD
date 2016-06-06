@@ -1,11 +1,11 @@
 using System;
 using Microsoft.SPOT.Hardware;
 
-namespace RockSatC_2016.Flight_Computer
+namespace RockSatC_2016.Drivers
 {
     public class I2CBus : IDisposable
     {
-        private static I2CBus _instance;
+        private static I2CBus _instance = null;
         private static readonly object LockObject = new object();
 
         public static I2CBus GetInstance() {

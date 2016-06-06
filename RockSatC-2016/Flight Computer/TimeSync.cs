@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using Microsoft.SPOT;
 using RockSatC_2016.Drivers;
 using RockSatC_2016.Work_Items;
 
@@ -11,18 +10,16 @@ namespace RockSatC_2016.Flight_Computer
         private readonly WorkItem _workItem;
         private readonly byte[] _dataArray;
         private readonly int _offset;
-        private readonly int _metaDataCount = 2;
+        private readonly int _metaDataCount = 4;
         private readonly int _delay;
-
 
         public TimeSync(int dataSize = 11, int delay = 30000)
         {
             _dataArray = new byte[dataSize + _metaDataCount]; // start, type, size, size, hours, minutes, seconds, 8 bytes for millis()
             _dataArray[0] = (byte) PacketType.StartByte;
             _dataArray[1] = (byte) PacketType.TimeSync;
-            //_dataArray[2] = (byte) ((dataSize >> 8) & 0xff);
-            //_dataArray[3] = (byte) (dataSize & 0xff);
-            //_dataArray[2] = (byte) (dataSize & 0xff);
+            _dataArray[2] = (byte) ((dataSize >> 8) & 0xff);
+            _dataArray[3] = (byte) (dataSize & 0xff);
             _offset = _metaDataCount;
             _delay = delay;
             _workItem = new WorkItem(SyncTime, ref _dataArray, loggable:true, persistent:true);
@@ -32,17 +29,7 @@ namespace RockSatC_2016.Flight_Computer
         {
             var dataIndex = 0;
             var time = RTC.CurrentTime();
-            var elapsed = Clock.Instance.ElapsedMilliseconds;
-
-            if (elapsed > 210000 && elapsed < 225000)
-            {
-                Debug.Print("Hit our cleanup mark! " + elapsed);
-                FlightComputer.Instance.Execute(MemoryMonitor.CleanupMemory);
-            }
-
-            var millis = BitConverter.GetBytes(elapsed);
-
-            
+            var millis = BitConverter.GetBytes(Clock.Instance.ElapsedMilliseconds);
 
             _dataArray[dataIndex++ + _offset] = time[0];
             _dataArray[dataIndex++ + _offset] = time[1];

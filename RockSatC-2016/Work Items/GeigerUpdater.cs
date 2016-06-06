@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
-using RockSatC_2016.Drivers;
 using RockSatC_2016.Flight_Computer;
 using SecretLabs.NETMF.Hardware.Netduino;
 
@@ -19,9 +18,10 @@ namespace RockSatC_2016.Work_Items {
         private int UnshieldedCounts { get; set; }
 
         private readonly int _sleepTime;
-        private readonly byte[] _dataArray;
+        public byte[] _dataArray;
+        private readonly int _offset;
 
-        private int _metadataCount = 2; 
+        private int _metadataCount = 4; 
         private int _timedataCount = 3; // 1 x 8 bytes
 
         public GeigerUpdater(int dataCount = 2, int sleepInterval = 1000)
@@ -36,21 +36,22 @@ namespace RockSatC_2016.Work_Items {
 
             Debug.Print("Creating Threadpool action, repeats every 5 seconds.");
 
+
             _dataArray = new byte[dataCount + _metadataCount + _timedataCount];
             _dataArray[0] = (byte)PacketType.StartByte; // start bit = 0xff
             _dataArray[1] = (byte)PacketType.Geiger;
 
-            //var dataSize = dataCount + _timedataCount;
-            //_dataArray[2] = (byte)((dataSize >> 8) & 0xFF);
-            //_dataArray[3] = (byte)(dataSize & 0xFF);
-            //_dataArray[2] = (byte)(dataCount + _timedataCount & 0xFF);
+            var dataSize = dataCount + _timedataCount;
+            _dataArray[2] = (byte)((dataSize >> 8) & 0xFF);
+            _dataArray[3] = (byte)(dataSize & 0xFF);
+            _offset = 4;
 
             _workItem = new WorkItem(GatherCounts, ref _dataArray, loggable:true, pauseable:true, persistent:true);
         }
 
         private void GatherCounts() {
             
-            var currentDataIndex = _metadataCount;
+            var currentDataIndex = _offset;
 
             var time = BitConverter.GetBytes(Clock.Instance.ElapsedMilliseconds);
             

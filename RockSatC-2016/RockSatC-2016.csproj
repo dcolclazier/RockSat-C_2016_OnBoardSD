@@ -38,12 +38,13 @@
     <Compile Include="Work Items\WorkItem.cs" />
     <Compile Include="Flight Computer\TimeSync.cs" />
     <Compile Include="Work Items\AccelUpdater.cs" />
-    <Compile Include="Flight Computer\I2CBus.cs" />
+    <Compile Include="Drivers\I2CBus.cs" />
     <Compile Include="Work Items\MemoryMonitor.cs" />
     <Compile Include="Drivers\RTC.cs" />
     <Compile Include="Work Items\SerialBNOUpdater.cs" />
     <Compile Include="Flight Computer\Logger.cs" />
     <Compile Include="Work Items\GeigerUpdater.cs" />
+    <Compile Include="Drivers\BMP180.cs" />
     <Compile Include="Drivers\SerialBNO.cs" />
     <Compile Include="Flight Computer\FlightComputer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
