@@ -38,7 +38,7 @@ namespace RockSatC_2016 {
 
             //THIS SECTION CREATES/INITIALIZES THE GEIGER COUNTER UPDATER
             Debug.Print("Initializing geiger counter collection data");
-            var geigerloop = new GeigerUpdater(delay:20);
+            var geigerloop = new GeigerUpdater(delay:10);
 
             //THIS SECTION CREATES/INITIALIZES THE GEIGER COUNTER UPDATER
             var accel_dump_size = 18432;

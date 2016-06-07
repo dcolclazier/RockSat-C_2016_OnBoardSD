@@ -11,7 +11,6 @@ namespace RockSatC_2016.Work_Items {
         static readonly InterruptPort ShieldedGeiger = new InterruptPort(Pins.GPIO_PIN_D2, false, Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeHigh);
         static readonly InterruptPort UnshieldedGeiger = new InterruptPort(Pins.GPIO_PIN_D3, false, Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeHigh);
 
-        //private readonly GeigerData _geigerData;
         private readonly WorkItem _workItem;
 
         private int ShieldedCounts { get; set; }
@@ -30,7 +29,8 @@ namespace RockSatC_2016.Work_Items {
            
 
             _delay = delay;
-            //_geigerData = new GeigerData();
+
+
             Debug.Print("Adding interrupt action for shielded geiger counter.");
             ShieldedGeiger.OnInterrupt += Shielded_Counter;
 
@@ -42,10 +42,6 @@ namespace RockSatC_2016.Work_Items {
             _dataArray = new byte[_dataCount + _metadataCount + _timedataCount];
             _dataArray[0] = (byte)PacketType.StartByte; // start bit = 0xff
             _dataArray[1] = (byte)PacketType.Geiger;
-
-            //var dataSize = dataCount + _timedataCount;
-            //_dataArray[2] = (byte)((dataSize >> 8) & 0xFF);
-            //_dataArray[3] = (byte)(dataSize & 0xFF);
 
             _workItem = new WorkItem(GatherCounts, ref _dataArray, loggable:true, pauseable:true, persistent:true);
 
@@ -72,7 +68,7 @@ namespace RockSatC_2016.Work_Items {
 
             ShieldedCounts = 0;
             UnshieldedCounts = 0;
-            Thread.Sleep(_delay);
+            //Thread.Sleep(_delay);
         }
 
         private void Shielded_Counter(uint data1, uint data2, DateTime time) {
