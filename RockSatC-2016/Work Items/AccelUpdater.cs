@@ -26,10 +26,10 @@ namespace RockSatC_2016.Work_Items
         private readonly WorkItem _workItem;
         private readonly byte[] _dataArray;
         private readonly int _dataCount;
-        private readonly int _offset;
+        //private readonly int _offset;
         private readonly double _zLaunchThreshold;
 
-        private const int MetaDataCount = 4;
+        private const int MetaDataCount = 2;
         private const int TimeDataCount = 6;
 
         public AccelUpdater(int dataCount, float zLaunchThreshold = 2.5f)
@@ -44,10 +44,7 @@ namespace RockSatC_2016.Work_Items
             _dataArray[0] = (byte)PacketType.StartByte; // start bit = 0xff
             _dataArray[1] = (byte)PacketType.AccelDump;
 
-            var dataSize = dataCount + TimeDataCount;
-            _dataArray[2] = (byte)((dataSize >> 8) & 0xFF);
-            _dataArray[3] = (byte)(dataSize & 0xFF);
-            _offset = 4;
+
         }
 
         //This is the method that gets run by the threadpool persistently... notice its name is 
@@ -56,7 +53,7 @@ namespace RockSatC_2016.Work_Items
         {
             //keeps track of the current index in the packet... notice how it increments
             //    as we continue adding data to it...
-            var currentDataIndex = _offset;
+            var currentDataIndex = MetaDataCount;
 
             //get our stopwatch's elapsed ms, stick it in our packet
             var time = BitConverter.GetBytes(Clock.Instance.ElapsedMilliseconds);
@@ -82,17 +79,11 @@ namespace RockSatC_2016.Work_Items
                         break;
                     case 2:
                         raw = (short)(ZPin.Read() * 1000);
-                        if (FlightComputer.Launched) break;
-
-                        if (Tools.map((short) (raw/1000), 0, 1, -200, 200) > _zLaunchThreshold) {
-                            Debug.Print("Launch detected!");
-                            FlightComputer.Launched = true;
-                        }
                         break;
                 }
                 var msb = (byte) ((raw >> 8) & 0xFF);
-                var lsb = (byte) (raw & 0xff);
-
+                var lsb = (byte) (raw & 0xff);                                    
+                                                                                  
                 _dataArray[currentDataIndex++] = msb;
                 _dataArray[currentDataIndex++] = lsb;
             }
