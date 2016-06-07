@@ -35,6 +35,7 @@
     <Compile Include="Drivers\RICH.cs" />
     <Compile Include="Utility\Tools.cs" />
     <Compile Include="Flight Computer\Clock.cs" />
+    <Compile Include="Work Items\Rebug.cs" />
     <Compile Include="Work Items\WorkItem.cs" />
     <Compile Include="Flight Computer\TimeSync.cs" />
     <Compile Include="Work Items\AccelUpdater.cs" />

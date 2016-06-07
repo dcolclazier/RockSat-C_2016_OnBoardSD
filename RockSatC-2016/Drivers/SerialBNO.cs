@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.SPOT;
 using RockSatC_2016.Utility;
+using RockSatC_2016.Work_Items;
 
 namespace RockSatC_2016.Drivers {
     
@@ -19,14 +20,14 @@ namespace RockSatC_2016.Drivers {
 
         public bool Begin()
         {
-            Debug.Print("Opening BNO communications channel...");
+            Rebug.Print("Opening BNO communications channel...");
             _comPort.Open();
 
             ConfigMode();
             write_byte(Bno055Registers.Bno055PageIdAddr, 0);
 
             var bnoId = read_byte(Bno055Registers.Bno055ChipIdAddr);
-            Debug.Print("Read chip ID for BNO055: 0x" + bnoId.ToString("x"));
+            Rebug.Print("Read chip ID for BNO055: 0x" + bnoId.ToString("x"));
 
             if (bnoId != Bno055Id) return false;
 
@@ -84,12 +85,12 @@ namespace RockSatC_2016.Drivers {
             if (!ack) return null;
             
             //wait for serial stream to fill with expected ack data
-            Thread.Sleep(150); //bug THIS THIS SLOW... should wait until correct amount of data is ready to be read.
+            Thread.Sleep(500); //bug THIS THIS SLOW... should wait until correct amount of data is ready to be read.
             
             var response = new byte[_comPort.BytesToRead];
             var readCount = _comPort.Read(response, 0, response.Length);
             //If we timed out, throw an exception.
-            if (readCount == 0) Debug.Print("Serial ACK timeout...");
+            if (readCount == 0) Rebug.Print("Serial ACK timeout...");
 
             //if we didn't get an error code (0xEE07), we're done.
             if (response.Length > 0 && !(response[0] == 0xEE && response[1] == 0x07)) return response;
@@ -188,12 +189,12 @@ namespace RockSatC_2016.Drivers {
         }
 
         private void ConfigMode() {
-            Debug.Print("BNO055 entering configuration mode...");
+            Rebug.Print("BNO055 entering configuration mode...");
             SetMode(Bno055OpMode.OperationModeConfig);
         }
 
         private void OpMode() {
-            Debug.Print("BNO055 entering normal operation mode...");
+            Rebug.Print("BNO055 entering normal operation mode...");
             SetMode(_mode);
         }
 

@@ -92,6 +92,11 @@ namespace RockSatC_2016.Flight_Computer {
             FlightComputer.OnEventTriggered -= OnDataFound;
         }
 
-        
+
+        public void AddPacket(ref byte[] packet)
+        {
+            OnDataFound(true,ref packet);
+
+        }
     }
 }

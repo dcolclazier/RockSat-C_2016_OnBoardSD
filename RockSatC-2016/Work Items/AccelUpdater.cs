@@ -13,7 +13,8 @@ namespace RockSatC_2016.Work_Items
         Geiger = 0x00,
         AccelDump = 0x01,
         BnoDump = 0x02,
-        TimeSync = 0x03
+        TimeSync = 0x03,
+        DebugMessage = 0x04
     }
 
     public class AccelUpdater  {
@@ -35,7 +36,7 @@ namespace RockSatC_2016.Work_Items
         public AccelUpdater(int dataCount, float zLaunchThreshold = 2.5f)
         {
             _zLaunchThreshold = zLaunchThreshold;
-            Debug.Print("Initializing Accelerometer data updater");
+            Rebug.Print("Initializing Accelerometer data updater");
             _dataCount = dataCount;
             _dataArray = new byte[dataCount + MetaDataCount + TimeDataCount]; //3 bytes for each time stamp, 2 for size, 1 for type, 1 for start
             _workItem = new WorkItem(DumpAccelData, ref _dataArray, loggable:true, persistent:true, pauseable:true);

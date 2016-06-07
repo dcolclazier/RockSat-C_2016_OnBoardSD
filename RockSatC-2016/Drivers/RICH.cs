@@ -1,6 +1,7 @@
 using System.Threading;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
+using RockSatC_2016.Work_Items;
 using SecretLabs.NETMF.Hardware.Netduino;
 
 namespace RockSatC_2016.Drivers
@@ -16,7 +17,7 @@ namespace RockSatC_2016.Drivers
 
         public void TurnOn()
         {
-            Debug.Print("Sending signal to power on RICH detector");
+            Rebug.Print("Sending signal to power on RICH detector");
             _richPin.Write(true);
             Thread.Sleep(500);
             _richPin.Write(false);
@@ -25,7 +26,7 @@ namespace RockSatC_2016.Drivers
 
         public void TurnOff()
         {
-            Debug.Print("Sending signal to power off RICH detector");
+            Rebug.Print("Sending signal to power off RICH detector");
             _richPin.Write(true);
             Thread.Sleep(4000);
             _richPin.Write(false);

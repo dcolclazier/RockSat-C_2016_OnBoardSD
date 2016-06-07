@@ -6,6 +6,8 @@ using RockSatC_2016.Flight_Computer;
 using SecretLabs.NETMF.Hardware.Netduino;
 
 namespace RockSatC_2016.Work_Items {
+
+
     public class GeigerUpdater  {
 
         static readonly InterruptPort ShieldedGeiger = new InterruptPort(Pins.GPIO_PIN_D2, false, Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeHigh);
@@ -31,13 +33,12 @@ namespace RockSatC_2016.Work_Items {
             _delay = delay;
 
 
-            Debug.Print("Adding interrupt action for shielded geiger counter.");
+            Rebug.Print("Adding interrupt action for shielded geiger counter.");
             ShieldedGeiger.OnInterrupt += Shielded_Counter;
 
-            Debug.Print("Adding interrupt action for unshielded geiger counter.");
+            Rebug.Print("Adding interrupt action for unshielded geiger counter.");
             UnshieldedGeiger.OnInterrupt += Unshielded_Counter;
 
-            Debug.Print("Creating Threadpool action, repeats every 5 seconds.");
 
             _dataArray = new byte[_dataCount + _metadataCount + _timedataCount];
             _dataArray[0] = (byte)PacketType.StartByte; // start bit = 0xff

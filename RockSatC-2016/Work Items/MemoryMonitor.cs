@@ -26,7 +26,7 @@ namespace RockSatC_2016.Work_Items
         {
             if (Debug.GC(true) > 60000) return;
 
-            Debug.Print("RAM critically low... pausing actions.  Freemem: " + Debug.GC(true) + "  TimeStamp: " + Clock.Instance.ElapsedMilliseconds);
+            Rebug.Print("RAM critically low... pausing actions.  Freemem: " + Debug.GC(true) + "  TimeStamp: " + Clock.Instance.ElapsedMilliseconds);
 
             foreach (WorkItem action in _pauseableWorkItems) action.Stop();
             //var currentCount = _logger.PendingItems;
@@ -35,7 +35,7 @@ namespace RockSatC_2016.Work_Items
                 
             }
 
-            Debug.Print("Resuming paused actions... Current FreeMem: " + Debug.GC(false) + "  TimeStamp: " + Clock.Instance.ElapsedMilliseconds);
+            Rebug.Print("Resuming paused actions... Current FreeMem: " + Debug.GC(false) + "  TimeStamp: " + Clock.Instance.ElapsedMilliseconds);
 
             foreach (WorkItem action in _pauseableWorkItems) action.Start();
 

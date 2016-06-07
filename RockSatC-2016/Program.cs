@@ -21,54 +21,55 @@ namespace RockSatC_2016 {
             Debug.Print("Starting logger...");
             logger.Start();
 
-            Debug.Print("Starting stopwatch");
+
+            Rebug.Print("Starting stopwatch");
             Clock.Instance.Start();
 
-            Debug.Print("Recording time-sync packet");
-            var timeSync = new TimeSync(delay:30000);
+            Rebug.Print("Recording time-sync packet");
+            var timeSync = new TimeSync(delay:10000);
             timeSync.Run();
 
             //Initializes the RICH on pin D7
-            Debug.Print("Initializing RICH detector");
+            Rebug.Print("Initializing RICH detector");
             var rich = new Rich();
 
             //THIS SECTION CREATES/INITIALIZES THE SERIAL BNO 100HZ UPDATER
-            Debug.Print("Initializing BNO Sensor ");
-            var bnoloop = new SerialBnoUpdater();
+            Rebug.Print("Initializing BNO Sensor ");
+            var bnoloop = new SerialBnoUpdater(delay:1000);
 
             //THIS SECTION CREATES/INITIALIZES THE GEIGER COUNTER UPDATER
-            Debug.Print("Initializing geiger counter collection data");
-            var geigerloop = new GeigerUpdater(delay:10, size:1024);
+            Rebug.Print("Initializing geiger counter collection data");
+            var geigerloop = new GeigerUpdater(delay:10, size:2048);
 
             //THIS SECTION CREATES/INITIALIZES THE GEIGER COUNTER UPDATER
             var accel_dump_size = 18432;
-            Debug.Print("Initializing fast accel dump collector with a size of " + accel_dump_size + "bytes.");
+            Rebug.Print("Initializing fast accel dump collector with a size of " + accel_dump_size + "bytes.");
             var acceldumploop = new AccelUpdater(accel_dump_size);
 
             //Thread.Sleep(5000);
-            Debug.Print("Flight computer INIT Complete. Continuing with boot.");
+            Rebug.Print("Flight computer INIT Complete. Continuing with boot.");
 
             //THIS SECTION INITIALIZES AND STARTS THE MEMORY MONITOR
-            Debug.Print("Starting memory monitor...");
+            Rebug.Print("Starting memory monitor...");
             MemoryMonitor.Instance.Start(ref logger);
 
             //THIS STARTS THE Accel dump update
-            Debug.Print("Starting accel dumper...");
+            Rebug.Print("Starting accel dumper...");
             acceldumploop.Start();
 
             //THIS STARTS THE BNO SENSOR UPDATE
-            Debug.Print("Starting bno sensor updates...");
+            Rebug.Print("Starting bno sensor updates...");
             bnoloop.Start();
 
             //THIS STARTS THE Geiger UPDATE.
-            Debug.Print("Starting geiger counter data collection...");
+            Rebug.Print("Starting geiger counter data collection...");
             geigerloop.Start();
 
             //Starts the RICH detector
-            Debug.Print("Starting RICH detector");
+            Rebug.Print("Starting RICH detector");
             rich.TurnOn();
 
-            Debug.Print("Flight computer boot successful.");
+            Rebug.Print("Flight computer boot successful.");
         }
 
     }
