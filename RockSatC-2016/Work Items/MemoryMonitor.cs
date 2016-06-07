@@ -15,7 +15,7 @@ namespace RockSatC_2016.Work_Items
         private Logger _logger;
         private int _preLaunchCount;
 
-        private MemoryMonitor(int preLaunchPauseCount = 5)
+        private MemoryMonitor(int preLaunchPauseCount = 25)
         {
             var unused = new byte[] {};
             _workItem = new WorkItem(MonitorMemory,ref unused, loggable:false, persistent:true, pauseable:false );

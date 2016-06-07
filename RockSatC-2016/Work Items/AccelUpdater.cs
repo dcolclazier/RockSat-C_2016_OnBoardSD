@@ -27,7 +27,6 @@ namespace RockSatC_2016.Work_Items
         private readonly byte[] _dataArray;
         private readonly int _dataCount;
         private readonly int _offset;
-        private WorkItem _launchItem;
         private readonly double _zLaunchThreshold;
 
         private const int MetaDataCount = 4;
@@ -41,9 +40,6 @@ namespace RockSatC_2016.Work_Items
             _dataArray = new byte[dataCount + MetaDataCount + TimeDataCount]; //3 bytes for each time stamp, 2 for size, 1 for type, 1 for start
             _workItem = new WorkItem(DumpAccelData, ref _dataArray, loggable:true, persistent:true, pauseable:true);
 
-            var unused = new byte[0];
-            _launchItem = new WorkItem(OnLaunch, ref unused, false, false, false);
-
             //start data packet w/ correct info
             _dataArray[0] = (byte)PacketType.StartByte; // start bit = 0xff
             _dataArray[1] = (byte)PacketType.AccelDump;
@@ -53,11 +49,6 @@ namespace RockSatC_2016.Work_Items
             _dataArray[3] = (byte)(dataSize & 0xFF);
             _offset = 4;
         }
-
-        private void OnLaunch(){
-            
-        }
-
 
         //This is the method that gets run by the threadpool persistently... notice its name is 
         //listed above as a parameter...
@@ -69,16 +60,10 @@ namespace RockSatC_2016.Work_Items
 
             //get our stopwatch's elapsed ms, stick it in our packet
             var time = BitConverter.GetBytes(Clock.Instance.ElapsedMilliseconds);
-            //Debug.Print("Accel Time start: " + BitConverter.ToInt64(time, 0) + ":" + Debug.GC(false));
             _dataArray[currentDataIndex++] = time[0];
             _dataArray[currentDataIndex++] = time[1];
             _dataArray[currentDataIndex++] = time[2];
-            //_dataArray[currentDataIndex++] = time[3];
-            //_dataArray[currentDataIndex++] = time[4];
-            //_dataArray[currentDataIndex++] = time[5];
-            //_dataArray[currentDataIndex++] = time[6];
-            //_dataArray[currentDataIndex++] = time[7];
-
+          
             //anything beyond simply filling RAM with data is S-L-O-W on the .NetMF due to the 
             // overhead associated with it. 
             //
@@ -113,21 +98,14 @@ namespace RockSatC_2016.Work_Items
             }
 
             time = BitConverter.GetBytes(Clock.Instance.ElapsedMilliseconds);
-            //Debug.Print("Accel Time stop: " + BitConverter.ToInt64(endTime, 0));
 
             //last 8 bytes store end time stamp
             _dataArray[currentDataIndex++] = time[0];
             _dataArray[currentDataIndex++] = time[1];
             _dataArray[currentDataIndex] = time[2];
-            //_dataArray[currentDataIndex++] = time[3];
-            //_dataArray[currentDataIndex++] = time[4];
-            //_dataArray[currentDataIndex++] = time[5];
-            //_dataArray[currentDataIndex++] = time[6];
-            //_dataArray[currentDataIndex] = time[7];
-
+          
             //pass this off to the packet so it gets recorded to the sd card.
             Array.Copy(_dataArray, _workItem.PacketData, _dataArray.Length);
-            //_workItem.PacketData = _dataArray;
         }
 
         //called in program.cs to start up the accelerometer sensor logger

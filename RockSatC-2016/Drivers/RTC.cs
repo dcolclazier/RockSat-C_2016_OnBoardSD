@@ -8,10 +8,6 @@ namespace RockSatC_2016.Drivers
     internal static class RTC
     {
         private static readonly I2CDevice.Configuration SlaveConfig;
-        private static byte _h;
-        private static byte _m;
-        private static byte _s;
-        private static readonly object locker = new object();
         private const int TransactionTimeout = 1000;
         private const byte ClockRateKHz = 59;
 

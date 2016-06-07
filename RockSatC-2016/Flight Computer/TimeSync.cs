@@ -44,13 +44,7 @@ namespace RockSatC_2016.Flight_Computer
             _dataArray[dataIndex++ + _offset] = millis[6];
             _dataArray[dataIndex + _offset] = millis[7];
 
-            //time = RTC.CurrentTime();
-            //_dataArray[dataIndex++ + _offset] = time[0];
-            //_dataArray[dataIndex++ + _offset] = time[1];
-            //_dataArray[dataIndex + _offset] = time[2];
-
             Array.Copy(_dataArray,_workItem.PacketData,0);
-            //_workItem.PacketData = _dataArray;
             Thread.Sleep(_delay);
         }
 

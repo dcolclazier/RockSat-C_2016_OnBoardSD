@@ -35,12 +35,12 @@ namespace RockSatC_2016.Work_Items {
             _delay = delay;
             _precision = (int)System.Math.Pow(10, sigFigs - 1);
             
-            _workItem = new WorkItem(GyroUpdater, ref _dataArray, loggable:true, persistent:true, pauseable:true);
+            _workItem = new WorkItem(BnoUpdater, ref _dataArray, loggable:true, persistent:true, pauseable:true);
 
             _bnoSensor.Begin();
         }
 
-        private void GyroUpdater()
+        private void BnoUpdater()
         {
             Thread.Sleep(_delay);
             var dataIndex = _metaDataCount;
@@ -49,27 +49,7 @@ namespace RockSatC_2016.Work_Items {
             _dataArray[dataIndex++] = time[0];
             _dataArray[dataIndex++] = time[1];
             _dataArray[dataIndex++] = time[2];
-            //_dataArray[dataIndex++] = time[3];
-            //_dataArray[dataIndex++] = time[4];
-            //_dataArray[dataIndex++] = time[5];
-            //_dataArray[dataIndex++] = time[6];
-            //_dataArray[dataIndex++] = time[7];
-
-            //var gyroVec = _bnoSensor.read_vector(SerialBno.Bno055VectorType.VectorGyroscope);
-            //gyroVec.X = (short) (gyroVec.X*_precision);
-            //gyroVec.Y = (short) (gyroVec.Y*_precision);
-            //gyroVec.Z = (short) (gyroVec.Z*_precision);
-
-            //_dataArray[dataIndex++] = (byte) (((short)gyroVec.X >> 8) & 0xFF);
-            //_dataArray[dataIndex++] = (byte) ((short)gyroVec.X & 0xFF);
-
-            //_dataArray[dataIndex++] = (byte)(((short)gyroVec.Y >> 8) & 0xFF);
-            //_dataArray[dataIndex++] = (byte)((short)gyroVec.Y & 0xFF);
-
-            //_dataArray[dataIndex++] = (byte)(((short)gyroVec.Z >> 8) & 0xFF);
-            //_dataArray[dataIndex++] = (byte)((short)gyroVec.Z & 0xFF);
-
-
+            
             var accelVec = _bnoSensor.read_vector(SerialBno.Bno055VectorType.VectorAccelerometer);
             accelVec.X = (short) (accelVec.X*_precision);
             accelVec.Y = (short) (accelVec.Y*_precision);
@@ -84,14 +64,8 @@ namespace RockSatC_2016.Work_Items {
             _dataArray[dataIndex++] = (byte)(((short)accelVec.Z >> 8) & 0xFF);
             _dataArray[dataIndex] = (byte)((short)accelVec.Z & 0xFF);
 
-            //var temp = _bnoSensor.read_signed_byte(SerialBno.Bno055Registers.Bno055TempAddr);
-            //_dataArray[dataIndex] = (byte)((temp >> 8) & 0xFF);
-            //_dataArray[dataIndex] = (byte)(temp & 0xFF);
-
             Array.Copy(_dataArray, _workItem.PacketData, _dataArray.Length);
 
-            //Debug.Print("BNO Sensor update complete.");
-            
         }
 
         public void Start() {

@@ -84,7 +84,7 @@ namespace RockSatC_2016.Drivers {
             if (!ack) return null;
             
             //wait for serial stream to fill with expected ack data
-            Thread.Sleep(65); //bug THIS THIS SLOW... should wait until correct amount of data is ready to be read.
+            Thread.Sleep(150); //bug THIS THIS SLOW... should wait until correct amount of data is ready to be read.
             
             var response = new byte[_comPort.BytesToRead];
             var readCount = _comPort.Read(response, 0, response.Length);
