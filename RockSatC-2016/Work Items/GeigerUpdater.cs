@@ -19,14 +19,14 @@ namespace RockSatC_2016.Work_Items {
         private readonly int _delay;
         public byte[] _dataArray;
 
-        private int _dataCount = 2;
+        private int _dataCount;
         private int _metadataCount = 2; 
-        private int _timedataCount = 3; // 1 x 8 bytes
+        private int _timedataCount = 6; // 1 x 8 bytes
         private long _timeSinceLastRun;
 
-        public GeigerUpdater(int delay)
+        public GeigerUpdater(int delay, int size)
         {
-           
+            _dataCount = size;
 
             _delay = delay;
 
@@ -60,15 +60,32 @@ namespace RockSatC_2016.Work_Items {
 
 
             //if we only need 1 byte per update (at 20+ hz)
-            _dataArray[currentDataIndex++] = (byte)ShieldedCounts;
-            _dataArray[currentDataIndex] = (byte)UnshieldedCounts;
+            //_dataArray[currentDataIndex++] = (byte)ShieldedCounts;
+            //_dataArray[currentDataIndex] = (byte)UnshieldedCounts;
 
+            for (int i = 0; i < _dataCount; i++)
+            {
+                if (i%2 == 0)
+                {
+                    _dataArray[currentDataIndex++] = (byte) ShieldedCounts;
+                    ShieldedCounts = 0;
+                }
+                else
+                {
+                    _dataArray[currentDataIndex++] = (byte)UnshieldedCounts;
+                    UnshieldedCounts = 0;
+                }
+            }
+            //_dataArray[currentDataIndex++] = (byte)UnshieldedCounts;
+
+            time = BitConverter.GetBytes(Clock.Instance.ElapsedMilliseconds);
+
+            _dataArray[currentDataIndex++] = time[0];
+            _dataArray[currentDataIndex++] = time[1];
+            _dataArray[currentDataIndex] = time[2];
+            //Thread.Sleep(_delay);
 
             Array.Copy(_dataArray, _workItem.PacketData, _dataArray.Length);
-
-            ShieldedCounts = 0;
-            UnshieldedCounts = 0;
-            //Thread.Sleep(_delay);
         }
 
         private void Shielded_Counter(uint data1, uint data2, DateTime time) {
