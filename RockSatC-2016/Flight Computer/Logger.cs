@@ -12,7 +12,15 @@ namespace RockSatC_2016.Flight_Computer {
 
         private readonly WorkItem _workItem;
         private readonly string _file;
-        public int PendingItems => _pendingData.Count;
+        private object locker = new object();
+
+        public int PendingItems
+        {
+            get {
+                lock (locker)
+                    return _pendingData.Count;
+            }
+        }
 
         public Logger()
         {
@@ -35,16 +43,20 @@ namespace RockSatC_2016.Flight_Computer {
         }
         
         private void LogWorker() {
-            if (PendingItems == 0) return;
             
-            var packet = (QueuePacket)_pendingData.Dequeue();
-            using (var stream = new FileStream(_file, FileMode.Append))
+            if (PendingItems == 0) return;
+            do
             {
-                stream.Write(packet.ArrayData, 0, packet.ArrayData.Length);
+                var packet = (QueuePacket) _pendingData.Dequeue();
+                using (var stream = new FileStream(_file, FileMode.Append))
+                {
+                    stream.Write(packet.ArrayData, 0, packet.ArrayData.Length);
 
-                var b = Encoding.UTF8.GetBytes("dummy data to force StreamWriter data to get written to SD");
-                File.WriteAllBytes(@"\SD\SDdummy.txt", b);
-            }
+
+                    //File.WriteAllBytes(@"\SD\SDdummy.txt", Encoding.UTF8.GetBytes("r2d2ftw"));
+                }
+            } while (PendingItems > 0);
+
         }
         
         struct QueuePacket {
@@ -67,6 +79,7 @@ namespace RockSatC_2016.Flight_Computer {
         public void Start() {
             FlightComputer.Instance.Execute(_workItem);
             FlightComputer.OnEventTriggered += OnDataFound;
+            FlightComputer.Logger = this;
         }
 
         public void Stop() {
