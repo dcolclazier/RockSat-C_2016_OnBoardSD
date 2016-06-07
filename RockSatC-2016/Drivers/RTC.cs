@@ -1,5 +1,6 @@
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
+using RockSatC_2016.Flight_Computer;
 using RockSatC_2016.Utility;
 
 namespace RockSatC_2016.Drivers
@@ -40,7 +41,7 @@ namespace RockSatC_2016.Drivers
             var minutes = Tools.Bcd2Bin(new [] { time[1] });
             var hours = Tools.Bcd2Bin(new [] { time[2] });
 
-            Debug.Print("Current time: " + hours + ":" + minutes + ":" + realseconds);
+            Debug.Print("Current time: " + hours + ":" + minutes + ":" + realseconds + ", Freemem: " + Debug.GC(true) + ", Action Count: " + ThreadPool.ActionCount + ", Log count: " + FlightComputer.Logger.PendingItems);
             return new[]
             {
                 (byte)hours,

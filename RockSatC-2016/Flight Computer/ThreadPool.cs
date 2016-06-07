@@ -15,7 +15,7 @@ namespace RockSatC_2016.Flight_Computer {
         private static readonly FlightComputer FlightComputer = FlightComputer.Instance;
         private const int MaxThreads = 4;
 
-        
+        public static int ActionCount => ThreadActions.Count;
         
         public static void QueueWorkItem(WorkItem workItem) {
           
